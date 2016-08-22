@@ -21,7 +21,7 @@
         /// <returns>Converted filter.</returns>
         public override string ToString()
         {
-            return FieldName + (int)Order;
+            return $"{FieldName} {(int)Order}";
         }
     }
 }
