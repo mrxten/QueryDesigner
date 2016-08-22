@@ -1,9 +1,12 @@
 ﻿namespace RequestFilters
 {
+    /// <summary>
+    /// Filter for linq expression.
+    /// </summary>
     public class WhereFilter
     {
         /// <summary>
-        /// Class constructor.
+        /// Filter for linq expression.
         /// </summary>
         public WhereFilter()
         {

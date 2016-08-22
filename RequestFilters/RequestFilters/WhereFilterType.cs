@@ -1,5 +1,8 @@
 ﻿namespace RequestFilters
 {
+    /// <summary>
+    /// Type of elements comparison.
+    /// </summary>
     public enum WhereFilterType
     {
         /// <summary>

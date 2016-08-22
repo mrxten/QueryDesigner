@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataRequest.cs" />
     <Compile Include="OrderFilter.cs" />
     <Compile Include="OrderFilterType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
