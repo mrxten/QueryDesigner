@@ -54,5 +54,20 @@
         /// The field is not start with value.
         /// </summary>
         NotStartsWith,
+
+        /// <summary>
+        /// Collection contains an element.
+        /// </summary>
+        InCollection,
+
+        /// <summary>
+        /// Collection contains data.
+        /// </summary>
+        Any,
+
+        /// <summary>
+        /// Collection not contains data.
+        /// </summary>
+        NotAny
     }
 }
