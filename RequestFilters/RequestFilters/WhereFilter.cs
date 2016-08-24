@@ -1,7 +1,7 @@
 ﻿namespace RequestFilters
 {
     /// <summary>
-    /// Filter for linq expression.
+    /// Filter for database query.
     /// </summary>
     public class WhereFilter
     {

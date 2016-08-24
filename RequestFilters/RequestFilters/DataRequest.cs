@@ -8,14 +8,25 @@
     public class DataRequest
     {
         /// <summary>
+        /// Container for filters.
+        /// </summary>
+        public DataRequest()
+        {
+            WhereFilters = new List<WhereFilter>();
+            OrderFilters = new List<OrderFilter>();
+            Skip = 0;
+            Take = 100;
+        }
+
+        /// <summary>
         /// Where filters.
         /// </summary>
-        public IEnumerable<WhereFilter> WhereFilters { get; set; }
+        public List<WhereFilter> WhereFilters { get; set; }
 
         /// <summary>
         /// Order filters.
         /// </summary>
-        public IEnumerable<OrderFilter> OrderFilters { get; set; }
+        public List<OrderFilter> OrderFilters { get; set; }
 
         /// <summary>
         /// Skip number of elements.
