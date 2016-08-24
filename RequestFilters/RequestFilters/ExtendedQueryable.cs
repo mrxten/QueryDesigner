@@ -1,12 +1,12 @@
-﻿using System;
-using System.Linq;
-
-namespace RequestFilters
+﻿namespace RequestFilters
 {
+    using System;
+    using System.Linq;
+    
     /// <summary>
-    /// Override linq functions.
+    /// Override Quaryable functions.
     /// </summary>
-    public static class LinqExpressions
+    public static class ExtendedQueryable
     {
         /// <summary>
         /// Filtration items based on a given WhereFilter.

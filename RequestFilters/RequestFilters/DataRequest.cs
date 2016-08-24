@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-
-namespace RequestFilters
+﻿namespace RequestFilters
 {
+    using System.Collections.Generic;
+    
     /// <summary>
     /// Container for filters.
     /// </summary>
