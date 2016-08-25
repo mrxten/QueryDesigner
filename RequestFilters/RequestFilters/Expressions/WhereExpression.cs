@@ -143,33 +143,29 @@
         private static object TryCastFieldValueType(object value, Type type)
         {
             if (value == null && type.IsValueType)
-            {
                 throw new InvalidCastException("Null value may not be significant type.");
-            }
             
             var valueType = value.GetType();
+
             if (valueType == type)
                 return value;
 
             if (type.BaseType == typeof(Enum))
                 return Enum.Parse(type, Convert.ToString(value));
 
-            if (_availableCastTypes.Contains(type))
-            {
-                string s = Convert.ToString(value);
-                object res = Activator.CreateInstance(type);
-                var argTypes = new[] { _stringType, type.MakeByRefType() };
-                object[] args = { s, res };
-                var tryParse = type.GetMethod("TryParse", argTypes);
+            if (!_availableCastTypes.Contains(type))
+                return value;
 
-                if (!(bool)(tryParse?.Invoke(null, args) ?? false))
-                {
-                    throw new InvalidCastException($"Cannot convert the value of {s} to type {type.Name}");
-                }
-                return args[1];
-            }
+            string s = Convert.ToString(value);
+            object res = Activator.CreateInstance(type);
+            var argTypes = new[] { _stringType, type.MakeByRefType() };
+            object[] args = { s, res };
+            var tryParse = type.GetMethod("TryParse", argTypes);
 
-            return value;
+            if (!(bool)(tryParse?.Invoke(null, args) ?? false))
+                throw new InvalidCastException($"Cannot convert value to type {type.Name}");
+
+            return args[1];
         }
     }
 }
