@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace RequestFilters
 {
     /// <summary>
-    /// Filters with infinite nesting and boolean operations therebetween
+    /// Filters with infinite nesting and boolean operations therebetween.
     /// </summary>
     public class TreeFilter : WhereFilter
     {

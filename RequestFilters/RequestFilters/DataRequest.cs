@@ -10,12 +10,12 @@
         /// <summary>
         /// Where filters.
         /// </summary>
-        public TreeFilter TreeFilter { get; set; }
+        public TreeFilter Where { get; set; }
 
         /// <summary>
         /// Order filters.
         /// </summary>
-        public List<OrderFilter> OrderFilter { get; set; }
+        public List<OrderFilter> OrderBy { get; set; }
 
         /// <summary>
         /// Skip number of elements.

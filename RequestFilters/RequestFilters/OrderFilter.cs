@@ -8,7 +8,7 @@
         /// <summary>
         /// Sort field name.
         /// </summary>
-        public string FieldName { get; set; }
+        public string Field { get; set; }
 
         /// <summary>
         /// Sorting order.
