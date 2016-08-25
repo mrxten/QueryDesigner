@@ -48,8 +48,10 @@
     <Compile Include="OrderFilter.cs" />
     <Compile Include="OrderFilterType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TreeFilterType.cs" />
     <Compile Include="WhereFilter.cs" />
     <Compile Include="WhereFilterType.cs" />
+    <Compile Include="TreeFilter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
