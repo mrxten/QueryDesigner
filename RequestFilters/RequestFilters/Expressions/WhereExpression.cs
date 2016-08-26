@@ -142,9 +142,13 @@
         /// <returns>Converted value.</returns>
         private static object TryCastFieldValueType(object value, Type type)
         {
-            if (value == null && type.IsValueType)
-                throw new InvalidCastException("Null value may not be significant type.");
-            
+            if (value == null)
+            {
+                if (type.IsValueType)
+                    throw new InvalidCastException("Null value may not be significant type.");
+                return null;
+            }
+
             var valueType = value.GetType();
 
             if (valueType == type)
