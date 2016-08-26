@@ -119,6 +119,10 @@
                     var cc = _collectionContains.MakeGenericMethod(((MemberExpression)prop).Type);
                     return Expression.Call(cc, Expression.Constant(field.Value), prop);
 
+                case WhereFilterType.NotInCollection:
+                    var ncc = _collectionContains.MakeGenericMethod(((MemberExpression)prop).Type);
+                    return Expression.Not(Expression.Call(ncc, Expression.Constant(field.Value), prop));
+
                 case WhereFilterType.Any:
                     var ca = _collectionAny.MakeGenericMethod(
                         ((MemberExpression)prop).Type.GenericTypeArguments.First());
