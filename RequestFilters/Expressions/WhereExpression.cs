@@ -55,10 +55,12 @@
         {
             typeof(DateTime),
             typeof(bool),
-            typeof(long),
             typeof(int),
+            typeof(long),
             typeof(short),
-            typeof(Guid)
+            typeof(Guid),
+            typeof(double),
+            typeof(float),
         };
 
         /// <summary>
@@ -134,7 +136,7 @@
                     return Expression.Not(Expression.Call(cna, prop));
 
                 default:
-                    throw new InvalidOperationException("Invalid field filter type.");
+                    return prop;
             }
         }
 
@@ -146,12 +148,8 @@
         /// <returns>Converted value.</returns>
         private static object TryCastFieldValueType(object value, Type type)
         {
-            if (value == null)
-            {
-                if (type.IsValueType)
-                    throw new InvalidCastException("Null value may not be significant type.");
+            if (value == null || !_availableCastTypes.Contains(type))
                 return null;
-            }
 
             var valueType = value.GetType();
 
@@ -161,8 +159,6 @@
             if (type.BaseType == typeof(Enum))
                 return Enum.Parse(type, Convert.ToString(value));
 
-            if (!_availableCastTypes.Contains(type))
-                return value;
 
             string s = Convert.ToString(value);
             object res = Activator.CreateInstance(type);
