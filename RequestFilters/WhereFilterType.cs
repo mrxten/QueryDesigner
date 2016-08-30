@@ -6,6 +6,11 @@
     public enum WhereFilterType
     {
         /// <summary>
+        /// The field is not a filtered.
+        /// </summary>
+        None,
+
+        /// <summary>
         /// The field is equal to the value.
         /// </summary>
         Equal,

@@ -3,7 +3,6 @@
     using System;
     using System.Linq;
     using RequestFilters.Expressions;
-
     /// <summary>
     /// Override Quaryable functions.
     /// </summary>
@@ -18,7 +17,19 @@
         /// <returns>Filtered query.</returns>
         public static IQueryable<T> Where<T>(this IQueryable<T> query, WhereFilter filter)
         {
-            throw new NotImplementedException();
+            return query.Where(filter.GetExpression<T>());
+        }
+
+        /// <summary>
+        /// Filtration items based on a given WhereFilter.
+        /// </summary>
+        /// <typeparam name="T">Return type.</typeparam>
+        /// <param name="query">Integrable request.</param>
+        /// <param name="filter">Tree filter for sql expression.</param>
+        /// <returns>Filtered query.</returns>
+        public static IQueryable<T> Where<T>(this IQueryable<T> query, TreeFilter filter)
+        {
+            return query.Where(filter.GetTreeExpression<T>());
         }
 
         /// <summary>

@@ -63,6 +63,64 @@
             typeof(float),
         };
 
+        public static Expression<Func<T, bool>> GetExpression<T>(this WhereFilter filter, string suffix = "")
+        {
+            var e = Expression.Parameter(typeof(T), "e" + suffix);
+            var exs = GetExpressionForField<T>(e, filter, suffix + "0");
+            return Expression.Lambda<Func<T, bool>>(exs);
+        }
+
+        public static Expression<Func<T, bool>> GetTreeExpression<T>(this TreeFilter filter, string suffix = "")
+        {
+            if (filter.Type == TreeFilterType.None)
+                return filter.GetExpression<T>(suffix + "0");
+
+            var ex = (Expression)Expression.Parameter(typeof(T), "e" + suffix);
+            var exType = typeof (Expression);
+            var exName = filter.Type == TreeFilterType.And ? "AndAlso" : "OrElse";
+            var exMethod = exType.GetMethod(exName, new[] {exType, exType});
+
+            var i = 0;
+            foreach (var operand in filter.Operands)
+            {
+                var args = new object[] {ex, GetTreeExpression<T>(operand, suffix + i++)};
+                ex = (Expression)exMethod.Invoke(null, args);
+            }
+            return Expression.Lambda<Func<T, bool>>(ex);
+        }
+
+        private static Expression GetExpressionForField<T>(Expression e, WhereFilter field, string suffix)
+        {
+            var s = field.Field.Split('.');
+            Expression prop = e;
+            foreach (var t in s)
+            {
+                if (prop.Type.GetInterface("IEnumerable") != null)
+                {
+                    var generic = _expressionMethod.MakeGenericMethod(
+                        prop.Type.GenericTypeArguments.Single());
+                    object[] pars = {
+                        new WhereFilter
+                        {
+                            Field = t,
+                            FilterType = field.FilterType,
+                            Value = field.Value
+                        },
+                        suffix
+                    };
+                    var expr = (Expression)generic.Invoke(null, pars);
+                    return Expression.Call(
+                        _collectionAny2.MakeGenericMethod(
+                            ((MemberExpression)prop).Type.GenericTypeArguments.First()),
+                        prop,
+                        expr);
+                }
+                prop = Expression.Property(prop, t);
+            }
+            var exp = ConstructExpressionOneFilter(prop, field);
+            return exp;
+        }
+
         /// <summary>
         /// Construction of expression between different expression and a filter.
         /// </summary>
@@ -160,8 +218,8 @@
                 return Enum.Parse(type, Convert.ToString(value));
 
 
-            string s = Convert.ToString(value);
-            object res = Activator.CreateInstance(type);
+            var s = Convert.ToString(value);
+            var res = Activator.CreateInstance(type);
             var argTypes = new[] { _stringType, type.MakeByRefType() };
             object[] args = { s, res };
             var tryParse = type.GetMethod("TryParse", argTypes);
