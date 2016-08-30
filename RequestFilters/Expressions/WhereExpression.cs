@@ -13,6 +13,21 @@
         private static Type _stringType = typeof(string);
 
         /// <summary>
+        /// Expression type.
+        /// </summary>
+        private static Type _expType = typeof (Expression);
+
+        /// <summary>
+        /// Binary and method for expression.
+        /// </summary>
+        private static MethodInfo _andExpMethod = _expType.GetMethod("AndAlso", new[] { _expType, _expType });
+
+        /// <summary>
+        /// Binary or method for expression.
+        /// </summary>
+        private static MethodInfo _orExpMethod = _expType.GetMethod("OrElse", new[] { _expType, _expType });
+
+        /// <summary>
         /// Info about "Contains" method.
         /// </summary>
         private static MethodInfo _containsMethod = _stringType.GetMethod("Contains");
@@ -61,36 +76,55 @@
             typeof(Guid),
             typeof(double),
             typeof(float),
+            typeof(string)
         };
 
         public static Expression<Func<T, bool>> GetExpression<T>(this WhereFilter filter, string suffix = "")
         {
             var e = Expression.Parameter(typeof(T), "e" + suffix);
             var exs = GetExpressionForField<T>(e, filter, suffix + "0");
-            return Expression.Lambda<Func<T, bool>>(exs);
+            return Expression.Lambda<Func<T, bool>>(exs, e);
         }
 
         public static Expression<Func<T, bool>> GetTreeExpression<T>(this TreeFilter filter, string suffix = "")
         {
-            if (filter.Type == TreeFilterType.None)
-                return filter.GetExpression<T>(suffix + "0");
-
-            var ex = (Expression)Expression.Parameter(typeof(T), "e" + suffix);
-            var exType = typeof (Expression);
-            var exName = filter.Type == TreeFilterType.And ? "AndAlso" : "OrElse";
-            var exMethod = exType.GetMethod(exName, new[] {exType, exType});
-
-            var i = 0;
-            foreach (var operand in filter.Operands)
-            {
-                var args = new object[] {ex, GetTreeExpression<T>(operand, suffix + i++)};
-                ex = (Expression)exMethod.Invoke(null, args);
-            }
-            return Expression.Lambda<Func<T, bool>>(ex);
+            var e = Expression.Parameter(typeof(T), "e" + suffix);
+            return Expression.Lambda<Func<T, bool>>(GetExpressionForTreeField<T>(e, filter, suffix), e);
         }
 
-        private static Expression GetExpressionForField<T>(Expression e, WhereFilter field, string suffix)
+        private static Expression GetExpressionForTreeField<T>(ParameterExpression e, TreeFilter filter, string suffix)
         {
+            if (filter.Type == TreeFilterType.None)
+                return GetExpressionForField<T>(e, filter, suffix + "0");
+
+            if (filter.Operands.Any())
+            {
+                var i = 0;
+                var exp = GetExpressionForTreeField<T>(e, filter.Operands[i], suffix + i);
+                for (i = 1; i < filter.Operands.Count; i++)
+                {
+                    var args = new object[] { exp, GetExpressionForTreeField<T>(e, filter.Operands[i], suffix + i) };
+                    if (filter.Type == TreeFilterType.And)
+                    {
+                        exp = (BinaryExpression)_andExpMethod.Invoke(null, args);
+                    }
+                    else
+                    {
+                        exp = (BinaryExpression)_orExpMethod.Invoke(null, args);
+                    }
+                }
+                return exp;
+            }
+                throw new ArgumentException("Operands with Type different from TreeFilterType.None cannot be empty.");
+        }
+
+
+        private static Expression GetExpressionForField<T>(ParameterExpression e, WhereFilter field, string suffix)
+        {
+            if (field == null)
+                throw new ArgumentNullException(nameof(field));
+            if (field.FilterType == WhereFilterType.None || string.IsNullOrWhiteSpace(field.Field))
+                throw new ArgumentException("Filter type cannot be None for single filter.");
             var s = field.Field.Split('.');
             Expression prop = e;
             foreach (var t in s)
@@ -207,7 +241,7 @@
         private static object TryCastFieldValueType(object value, Type type)
         {
             if (value == null || !_availableCastTypes.Contains(type))
-                return null;
+                throw new InvalidCastException($"Cannot convert value to type {type.Name}.");
 
             var valueType = value.GetType();
 
@@ -225,7 +259,7 @@
             var tryParse = type.GetMethod("TryParse", argTypes);
 
             if (!(bool)(tryParse?.Invoke(null, args) ?? false))
-                throw new InvalidCastException($"Cannot convert value to type {type.Name}");
+                throw new InvalidCastException($"Cannot convert value to type {type.Name}.");
 
             return args[1];
         }

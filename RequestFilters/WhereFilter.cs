@@ -1,7 +1,7 @@
 ﻿namespace RequestFilters
 {
     /// <summary>
-    /// Filter for database query.
+    /// Tree filter for queryable expression.
     /// </summary>
     public class WhereFilter
     {
