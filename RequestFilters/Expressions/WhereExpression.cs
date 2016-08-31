@@ -10,63 +10,68 @@
         /// <summary>
         /// String type.
         /// </summary>
-        private static Type _stringType = typeof(string);
+        private static readonly Type StringType = typeof(string);
 
         /// <summary>
         /// Expression type.
         /// </summary>
-        private static Type _expType = typeof (Expression);
+        private static readonly Type ExpType = typeof (Expression);
 
         /// <summary>
-        /// Binary and method for expression.
+        /// Queryable type.
         /// </summary>
-        private static MethodInfo _andExpMethod = _expType.GetMethod("AndAlso", new[] { _expType, _expType });
+        private static readonly Type QueryableType = typeof(Queryable);
 
         /// <summary>
-        /// Binary or method for expression.
+        /// Binary AndAlso method for expression.
         /// </summary>
-        private static MethodInfo _orExpMethod = _expType.GetMethod("OrElse", new[] { _expType, _expType });
+        private static readonly MethodInfo AndExpMethod = ExpType.GetMethod("AndAlso", new[] { ExpType, ExpType });
+
+        /// <summary>
+        /// Binary OrElse method for expression.
+        /// </summary>
+        private static readonly MethodInfo OrExpMethod = ExpType.GetMethod("OrElse", new[] { ExpType, ExpType });
 
         /// <summary>
         /// Info about "Contains" method.
         /// </summary>
-        private static MethodInfo _containsMethod = _stringType.GetMethod("Contains");
+        private static readonly MethodInfo ContainsMethod = StringType.GetMethod("Contains");
 
         /// <summary>
         /// Info about "StartsWith" method.
         /// </summary>
-        private static MethodInfo _startsMethod = _stringType.GetMethod("StartsWith", new[] { typeof(string) });
+        private static readonly MethodInfo StartsMethod = StringType.GetMethod("StartsWith", new[] { typeof(string) });
 
         /// <summary>
         /// Info about "Contains" method for collection.
         /// </summary>
-        private static MethodInfo _collectionContains = typeof(Enumerable).GetMethods().Single(
+        private static readonly MethodInfo CollectionContains = QueryableType.GetMethods().Single(
                 method => method.Name == "Contains" && method.IsStatic &&
                 method.GetParameters().Length == 2);
 
         /// <summary>
         /// Info about "Any" method with one parameter for collection.
         /// </summary>
-        private static MethodInfo _collectionAny = typeof(Enumerable).GetMethods().Single(
+        private static readonly MethodInfo CollectionAny = QueryableType.GetMethods().Single(
                 method => method.Name == "Any" && method.IsStatic &&
                 method.GetParameters().Length == 1);
 
         /// <summary>
         /// Info about "Any" method with two parameter for collection.
         /// </summary>
-        private static MethodInfo _collectionAny2 = typeof(Enumerable).GetMethods().Single(
+        private static readonly MethodInfo CollectionAny2 = typeof(Queryable).GetMethods().Single(
                 method => method.Name == "Any" && method.IsStatic &&
                 method.GetParameters().Length == 2);
 
         /// <summary>
         /// Info about method of constructing expressions.
         /// </summary>
-        private static MethodInfo _expressionMethod = typeof(WhereExpression).GetMethod("GetExpression");
+        private static readonly MethodInfo ExpressionMethod = typeof(WhereExpression).GetMethod("GetExpression");
 
         /// <summary>
         /// Available types for conversion.
         /// </summary>
-        private static Type[] _availableCastTypes =
+        private static readonly Type[] AvailableCastTypes =
         {
             typeof(DateTime),
             typeof(bool),
@@ -126,7 +131,7 @@
 
             var i = 0;
             var exp = GetExpressionForTreeField(e, filter.Operands[i], suffix + i);
-            var mi = filter.OperatorType == TreeFilterType.And ? _andExpMethod : _orExpMethod;
+            var mi = filter.OperatorType == TreeFilterType.And ? AndExpMethod : OrExpMethod;
             for (i = 1; i < filter.Operands.Count; i++)
             {
                 var args = new object[] { exp, GetExpressionForTreeField(e, filter.Operands[i], suffix + i) };
@@ -155,7 +160,7 @@
             {
                 if (prop.Type.GetInterface("IEnumerable") != null)
                 {
-                    var generic = _expressionMethod.MakeGenericMethod(
+                    var generic = ExpressionMethod.MakeGenericMethod(
                         prop.Type.GenericTypeArguments.Single());
                     object[] pars = {
                         new WhereFilter
@@ -168,7 +173,7 @@
                     };
                     var expr = (Expression)generic.Invoke(null, pars);
                     return Expression.Call(
-                        _collectionAny2.MakeGenericMethod(
+                        CollectionAny2.MakeGenericMethod(
                             ((MemberExpression)prop).Type.GenericTypeArguments.First()),
                         prop,
                         expr);
@@ -220,34 +225,34 @@
                         Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)));
 
                 case WhereFilterType.Contains:
-                    return Expression.Call(prop, _containsMethod, Expression.Constant(filter.Value, _stringType));
+                    return Expression.Call(prop, ContainsMethod, Expression.Constant(filter.Value, StringType));
 
                 case WhereFilterType.NotContains:
                     return Expression.Not(
-                        Expression.Call(prop, _containsMethod, Expression.Constant(filter.Value, _stringType)));
+                        Expression.Call(prop, ContainsMethod, Expression.Constant(filter.Value, StringType)));
 
                 case WhereFilterType.StartsWith:
-                    return Expression.Call(prop, _startsMethod, Expression.Constant(filter.Value, _stringType));
+                    return Expression.Call(prop, StartsMethod, Expression.Constant(filter.Value, StringType));
 
                 case WhereFilterType.NotStartsWith:
                     return Expression.Not(
-                        Expression.Call(prop, _startsMethod, Expression.Constant(filter.Value, _stringType)));
+                        Expression.Call(prop, StartsMethod, Expression.Constant(filter.Value, StringType)));
 
                 case WhereFilterType.InCollection:
-                    var cc = _collectionContains.MakeGenericMethod(((MemberExpression)prop).Type);
+                    var cc = CollectionContains.MakeGenericMethod(((MemberExpression)prop).Type);
                     return Expression.Call(cc, Expression.Constant(filter.Value), prop);
 
                 case WhereFilterType.NotInCollection:
-                    var ncc = _collectionContains.MakeGenericMethod(((MemberExpression)prop).Type);
+                    var ncc = CollectionContains.MakeGenericMethod(((MemberExpression)prop).Type);
                     return Expression.Not(Expression.Call(ncc, Expression.Constant(filter.Value), prop));
 
                 case WhereFilterType.Any:
-                    var ca = _collectionAny.MakeGenericMethod(
+                    var ca = CollectionAny.MakeGenericMethod(
                         ((MemberExpression)prop).Type.GenericTypeArguments.First());
                     return Expression.Call(ca, prop);
 
                 case WhereFilterType.NotAny:
-                    var cna = _collectionAny.MakeGenericMethod(
+                    var cna = CollectionAny.MakeGenericMethod(
                         ((MemberExpression)prop).Type.GenericTypeArguments.First());
                     return Expression.Not(Expression.Call(cna, prop));
 
@@ -264,7 +269,7 @@
         /// <returns>Converted value.</returns>
         private static object TryCastFieldValueType(object value, Type type)
         {
-            if (value == null || !_availableCastTypes.Contains(type))
+            if (value == null || !AvailableCastTypes.Contains(type))
                 throw new InvalidCastException($"Cannot convert value to type {type.Name}.");
 
             var valueType = value.GetType();
@@ -278,7 +283,7 @@
 
             var s = Convert.ToString(value);
             var res = Activator.CreateInstance(type);
-            var argTypes = new[] { _stringType, type.MakeByRefType() };
+            var argTypes = new[] { StringType, type.MakeByRefType() };
             object[] args = { s, res };
             var tryParse = type.GetMethod("TryParse", argTypes);
 

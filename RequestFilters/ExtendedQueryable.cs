@@ -1,13 +1,31 @@
 ﻿namespace RequestFilters
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using RequestFilters.Expressions;
+
     /// <summary>
     /// Override Quaryable functions.
     /// </summary>
     public static class ExtendedQueryable
     {
+        /// <summary>
+        /// Container for DataRequest expression.
+        /// </summary>
+        /// <typeparam name="T">Return type.</typeparam>
+        /// <param name="query">Integrable request.</param>
+        /// <param name="request">Data request.</param>
+        /// <returns>Performed query.</returns>
+        public static IQueryable<T> Request<T>(this IQueryable<T> query, DataRequest request)
+        {
+            return query
+                .Where(request.Where)
+                .OrderBy(request.OrderBy)
+                .Skip(request.Skip)
+                .Take(request.Take);
+        } 
+
         /// <summary>
         /// Filtration items based on a given WhereFilter.
         /// </summary>
@@ -45,11 +63,33 @@
         /// </summary>
         /// <typeparam name="T">Return type.</typeparam>
         /// <param name="query">Integrable request.</param>
-        /// <param name="filter">Sorted query.</param>
-        /// <returns></returns>
+        /// <param name="filter">Sort filter.</param>
+        /// <exception cref="ArgumentException" />
+        /// <exception cref="ArgumentNullException" />
+        /// <exception cref="InvalidCastException" />
+        /// <exception cref="InvalidOperationException" />
+        /// <returns>Sorted query.</returns>
         public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> query, OrderFilter filter)
         {
-            throw new NotImplementedException();
+            return filter != null ? filter.GetOrderedQueryable(query) : (IOrderedQueryable<T>)query;
+        }
+
+        /// <summary>
+        /// Sorting items based on a given OrderFilter.
+        /// </summary>
+        /// <typeparam name="T">Return type.</typeparam>
+        /// <param name="query">Integrable request.</param>
+        /// <param name="filters">Enumeration of sort filters.</param>
+        /// <exception cref="ArgumentException" />
+        /// <exception cref="ArgumentNullException" />
+        /// <exception cref="InvalidCastException" />
+        /// <exception cref="InvalidOperationException" />
+        /// <returns>Sorted query.</returns>
+        public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> query, IEnumerable<OrderFilter> filters)
+        {
+            var res = (IOrderedQueryable<T>)query;
+            var step = 0;
+            return filters.Aggregate(res, (current, filter) => filter.GetOrderedQueryable(current, step++));
         }
     }
 }

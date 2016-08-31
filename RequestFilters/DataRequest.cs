@@ -25,6 +25,6 @@
         /// <summary>
         /// Take number of elements.
         /// </summary>
-        public int Take { get; set; }
+        public int Take { get; set; } = 100;
     }
 }

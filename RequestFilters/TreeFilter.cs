@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RequestFilters
+﻿namespace RequestFilters
 {
+    using System.Collections.Generic;
+
     /// <summary>
     /// Filters with infinite nesting and boolean operations therebetween.
     /// </summary>
