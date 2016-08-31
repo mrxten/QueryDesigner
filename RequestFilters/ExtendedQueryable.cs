@@ -21,7 +21,7 @@
         /// <returns>Filtered query.</returns>
         public static IQueryable<T> Where<T>(this IQueryable<T> query, WhereFilter filter)
         {
-            return query.Where(filter.GetExpression<T>());
+            return filter != null ? query.Where(filter.GetExpression<T>()) : query;
         }
 
         /// <summary>
@@ -37,7 +37,7 @@
         /// <returns>Filtered query.</returns>
         public static IQueryable<T> Where<T>(this IQueryable<T> query, TreeFilter filter)
         {
-            return query.Where(filter.GetTreeExpression<T>());
+            return filter != null ? query.Where(filter.GetTreeExpression<T>()) : query;
         }
 
         /// <summary>

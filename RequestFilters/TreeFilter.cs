@@ -12,9 +12,9 @@ namespace RequestFilters
     public class TreeFilter : WhereFilter
     {
         /// <summary>
-        /// Type of operands filtration.
+        /// Type of logical operator.
         /// </summary>
-        public TreeFilterType Type { get; set; } = TreeFilterType.None;
+        public TreeFilterType OperatorType { get; set; } = TreeFilterType.None;
 
         /// <summary>
         /// Operands of boolean expressions.

@@ -1,2 +1,2 @@
-# db-request-filters
+# query-request-filters
 On development stage.

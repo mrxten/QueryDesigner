@@ -79,53 +79,77 @@
             typeof(string)
         };
 
+        /// <summary>
+        /// Get final expression for filter.
+        /// </summary>
+        /// <typeparam name="T">Return type.</typeparam>
+        /// <param name="filter">Filter for query.</param>
+        /// <param name="suffix">Suffix vor variable.</param>
+        /// <returns>Final expression.</returns>
         public static Expression<Func<T, bool>> GetExpression<T>(this WhereFilter filter, string suffix = "")
         {
             var e = Expression.Parameter(typeof(T), "e" + suffix);
-            var exs = GetExpressionForField<T>(e, filter, suffix + "0");
+            var exs = GetExpressionForField(e, filter, suffix + "0");
             return Expression.Lambda<Func<T, bool>>(exs, e);
         }
 
+        /// <summary>
+        /// Get final expression for tree filter.
+        /// </summary>
+        /// <typeparam name="T">Return type.</typeparam>
+        /// <param name="filter">Tree filter for query.</param>
+        /// <param name="suffix">Suffix vor variable.</param>
+        /// <returns>Final expression.</returns>
         public static Expression<Func<T, bool>> GetTreeExpression<T>(this TreeFilter filter, string suffix = "")
         {
             var e = Expression.Parameter(typeof(T), "e" + suffix);
-            return Expression.Lambda<Func<T, bool>>(GetExpressionForTreeField<T>(e, filter, suffix), e);
+            return Expression.Lambda<Func<T, bool>>(GetExpressionForTreeField(e, filter, suffix), e);
         }
 
-        private static Expression GetExpressionForTreeField<T>(ParameterExpression e, TreeFilter filter, string suffix)
+        /// <summary>
+        /// Construct expressions chain for tree filter.
+        /// </summary>
+        /// <param name="e">Parameter expression.</param>
+        /// <param name="filter">Tree filter for query.</param>
+        /// <param name="suffix">Suffix vor variable.</param>
+        /// <returns>Expression chain.</returns>
+        private static Expression GetExpressionForTreeField(ParameterExpression e, TreeFilter filter, string suffix)
         {
-            if (filter.Type == TreeFilterType.None)
-                return GetExpressionForField<T>(e, filter, suffix + "0");
+            if (filter == null)
+                throw new ArgumentNullException(nameof(filter));
 
-            if (filter.Operands.Any())
+            if (filter.OperatorType == TreeFilterType.None)
+                return GetExpressionForField(e, filter, suffix + "0");
+
+            if (!(filter.Operands?.Any() ?? false))
+                throw new ArgumentException("Filter operands with operator type different from TreeFilterType.None cannot be empty.");
+
+            var i = 0;
+            var exp = GetExpressionForTreeField(e, filter.Operands[i], suffix + i);
+            var mi = filter.OperatorType == TreeFilterType.And ? _andExpMethod : _orExpMethod;
+            for (i = 1; i < filter.Operands.Count; i++)
             {
-                var i = 0;
-                var exp = GetExpressionForTreeField<T>(e, filter.Operands[i], suffix + i);
-                for (i = 1; i < filter.Operands.Count; i++)
-                {
-                    var args = new object[] { exp, GetExpressionForTreeField<T>(e, filter.Operands[i], suffix + i) };
-                    if (filter.Type == TreeFilterType.And)
-                    {
-                        exp = (BinaryExpression)_andExpMethod.Invoke(null, args);
-                    }
-                    else
-                    {
-                        exp = (BinaryExpression)_orExpMethod.Invoke(null, args);
-                    }
-                }
-                return exp;
+                var args = new object[] { exp, GetExpressionForTreeField(e, filter.Operands[i], suffix + i) };
+                exp = (BinaryExpression)mi.Invoke(null, args);
             }
-                throw new ArgumentException("Operands with Type different from TreeFilterType.None cannot be empty.");
+            return exp;
         }
 
-
-        private static Expression GetExpressionForField<T>(ParameterExpression e, WhereFilter field, string suffix)
+        /// <summary>
+        /// Construct expressions chain between WhereFilters.
+        /// </summary>
+        /// <param name="e">Parameter expression.</param>
+        /// <param name="filter">Tree filter for query.</param>
+        /// <param name="suffix">Suffix vor variable.</param>
+        /// <returns>Expression chain.</returns>
+        private static Expression GetExpressionForField(ParameterExpression e, WhereFilter filter, string suffix)
         {
-            if (field == null)
-                throw new ArgumentNullException(nameof(field));
-            if (field.FilterType == WhereFilterType.None || string.IsNullOrWhiteSpace(field.Field))
+            if (filter == null)
+                throw new ArgumentNullException(nameof(filter));
+
+            if (filter.FilterType == WhereFilterType.None || string.IsNullOrWhiteSpace(filter.Field))
                 throw new ArgumentException("Filter type cannot be None for single filter.");
-            var s = field.Field.Split('.');
+            var s = filter.Field.Split('.');
             Expression prop = e;
             foreach (var t in s)
             {
@@ -137,8 +161,8 @@
                         new WhereFilter
                         {
                             Field = t,
-                            FilterType = field.FilterType,
-                            Value = field.Value
+                            FilterType = filter.FilterType,
+                            Value = filter.Value
                         },
                         suffix
                     };
@@ -151,71 +175,71 @@
                 }
                 prop = Expression.Property(prop, t);
             }
-            var exp = ConstructExpressionOneFilter(prop, field);
+            var exp = GenerateExpressionOneField(prop, filter);
             return exp;
         }
 
         /// <summary>
-        /// Construction of expression between different expression and a filter.
+        /// Construct bool-expression between different expression and a filter.
         /// </summary>
         /// <param name="prop">Different expression.</param>
-        /// <param name="field">Filter for database query.</param>
+        /// <param name="filter">Filter for query.</param>
         /// <returns>Expression with filter.</returns>
-        private static Expression ConstructExpressionOneFilter(Expression prop, WhereFilter field)
+        private static Expression GenerateExpressionOneField(Expression prop, WhereFilter filter)
         {
-            switch (field.FilterType)
+            switch (filter.FilterType)
             {
                 case WhereFilterType.Equal:
                     return Expression.Equal(
                         prop,
-                        Expression.Constant(TryCastFieldValueType(field.Value, prop.Type)));
+                        Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)));
 
                 case WhereFilterType.NotEqual:
                     return Expression.NotEqual(
                         prop,
-                        Expression.Constant(TryCastFieldValueType(field.Value, prop.Type)));
+                        Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)));
 
                 case WhereFilterType.LessThan:
                     return Expression.LessThan(
                         prop,
-                        Expression.Constant(TryCastFieldValueType(field.Value, prop.Type)));
+                        Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)));
 
                 case WhereFilterType.GreaterThan:
                     return Expression.GreaterThan(
                         prop,
-                        Expression.Constant(TryCastFieldValueType(field.Value, prop.Type)));
+                        Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)));
 
                 case WhereFilterType.LessThanOrEqual:
                     return Expression.LessThanOrEqual(
                         prop,
-                        Expression.Constant(TryCastFieldValueType(field.Value, prop.Type)));
+                        Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)));
 
                 case WhereFilterType.GreaterThanOrEqual:
                     return Expression.GreaterThanOrEqual(
                         prop,
-                        Expression.Constant(TryCastFieldValueType(field.Value, prop.Type)));
+                        Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)));
 
                 case WhereFilterType.Contains:
-                    return Expression.Call(prop, _containsMethod, Expression.Constant(field.Value, _stringType));
+                    return Expression.Call(prop, _containsMethod, Expression.Constant(filter.Value, _stringType));
 
                 case WhereFilterType.NotContains:
                     return Expression.Not(
-                        Expression.Call(prop, _containsMethod, Expression.Constant(field.Value, _stringType)));
+                        Expression.Call(prop, _containsMethod, Expression.Constant(filter.Value, _stringType)));
 
                 case WhereFilterType.StartsWith:
-                    return Expression.Call(prop, _startsMethod, Expression.Constant(field.Value, _stringType));
+                    return Expression.Call(prop, _startsMethod, Expression.Constant(filter.Value, _stringType));
 
                 case WhereFilterType.NotStartsWith:
                     return Expression.Not(
-                        Expression.Call(prop, _startsMethod, Expression.Constant(field.Value, _stringType)));
+                        Expression.Call(prop, _startsMethod, Expression.Constant(filter.Value, _stringType)));
 
                 case WhereFilterType.InCollection:
                     var cc = _collectionContains.MakeGenericMethod(((MemberExpression)prop).Type);
-                    return Expression.Call(cc, Expression.Constant(field.Value), prop);
+                    return Expression.Call(cc, Expression.Constant(filter.Value), prop);
 
                 case WhereFilterType.NotInCollection:
                     var ncc = _collectionContains.MakeGenericMethod(((MemberExpression)prop).Type);
-                    return Expression.Not(Expression.Call(ncc, Expression.Constant(field.Value), prop));
+                    return Expression.Not(Expression.Call(ncc, Expression.Constant(filter.Value), prop));
 
                 case WhereFilterType.Any:
                     var ca = _collectionAny.MakeGenericMethod(
