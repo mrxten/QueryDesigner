@@ -8,7 +8,7 @@ namespace QueryFilters
     /// <summary>
     /// Override Quaryable functions.
     /// </summary>
-    public static class QueryableExtend
+    public static class ExtendedQueryable
     {
         /// <summary>
         /// FilterContainer expression.
@@ -71,7 +71,23 @@ namespace QueryFilters
         /// <returns>Sorted query.</returns>
         public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> query, OrderFilter filter)
         {
-            return filter != null ? filter.GetOrderedQueryable(query) : (IOrderedQueryable<T>)query;
+            return filter != null ? filter.GetOrderedQueryable(query, OrderStep.First) : (IOrderedQueryable<T>)query;
+        }
+
+        /// <summary>
+        /// Sorting items based on a given OrderFilter.
+        /// </summary>
+        /// <typeparam name="T">Return type.</typeparam>
+        /// <param name="query">Integrable request.</param>
+        /// <param name="filter">Sort filter.</param>
+        /// <exception cref="ArgumentException" />
+        /// <exception cref="ArgumentNullException" />
+        /// <exception cref="InvalidCastException" />
+        /// <exception cref="InvalidOperationException" />
+        /// <returns>Sorted query.</returns>
+        public static IOrderedQueryable<T> ThenBy<T>(this IQueryable<T> query, OrderFilter filter)
+        {
+            return filter != null ? filter.GetOrderedQueryable(query, OrderStep.Next) : (IOrderedQueryable<T>)query;
         }
 
         /// <summary>
@@ -88,8 +104,13 @@ namespace QueryFilters
         public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> query, IEnumerable<OrderFilter> filters)
         {
             var res = (IOrderedQueryable<T>)query;
-            var step = 0;
-            return filters.Aggregate(res, (current, filter) => filter.GetOrderedQueryable(current, step++));
+            var step = OrderStep.First;
+            foreach (var filter in filters)
+            {
+                res = filter.GetOrderedQueryable(res, step);
+                step = OrderStep.Next;
+            }
+            return res;
         }
     }
 }

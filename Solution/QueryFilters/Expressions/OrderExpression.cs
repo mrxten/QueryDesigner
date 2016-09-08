@@ -56,7 +56,7 @@ namespace QueryFilters.Expressions
         /// <param name="data">Data for sort.</param>
         /// <param name="step">Step number.</param>
         /// <returns>Sorted query.</returns>
-        public static IOrderedQueryable<T> GetOrderedQueryable<T>(this OrderFilter filter, IQueryable<T> data, int step = 0)
+        public static IOrderedQueryable<T> GetOrderedQueryable<T>(this OrderFilter filter, IQueryable<T> data, OrderStep step)
         {
             if (filter == null)
                 throw new ArgumentNullException(nameof(filter));
@@ -74,7 +74,7 @@ namespace QueryFilters.Expressions
 
             Type delegateType = typeof(Func<,>).MakeGenericType(typeof(T), type);
             Expression lambda = Expression.Lambda(delegateType, expr, arg);
-            MethodInfo m = step == 0
+            MethodInfo m = step == OrderStep.First
                 ? filter.Order == OrderFilterType.Asc ? QueryableOrderBy : QueryableOrderByDescending
                 : filter.Order == OrderFilterType.Asc ? QueryableThenBy : QueryableThenByDescending;
             
