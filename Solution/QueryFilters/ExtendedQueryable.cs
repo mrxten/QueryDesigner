@@ -38,7 +38,7 @@ namespace QueryFilters
         /// <exception cref="InvalidOperationException" />
         /// <returns>Filtered query.</returns>
         public static IQueryable<T> Where<T>(this IQueryable<T> query, WhereFilter filter)
-        {
+        {           
             return filter != null ? query.Where(filter.GetExpression<T>()) : query;
         }
 

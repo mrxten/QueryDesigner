@@ -1,9 +1,9 @@
-﻿namespace QueryFilters.Expressions
+﻿namespace QueryFilters
 {
     /// <summary>
     /// Sorting step.
     /// </summary>
-    public enum OrderStep
+    internal enum OrderStep
     {
         /// <summary>
         /// For OrderBy.
