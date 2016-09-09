@@ -19,11 +19,14 @@ namespace QueryFilters
         /// <returns>Performed query.</returns>
         public static IQueryable<T> Request<T>(this IQueryable<T> query, FilterContainer request)
         {
-            return query
+            IQueryable<T> res = query
                 .Where(request.Where)
-                .OrderBy(request.OrderBy)
-                .Skip(request.Skip)
-                .Take(request.Take);
+                .OrderBy(request.OrderBy);
+            if (request.Skip >= 0)
+                res = res.Skip(request.Skip);
+            if (request.Take > 0)
+                res = res.Take(request.Take);
+            return res;
         } 
 
         /// <summary>
@@ -105,11 +108,12 @@ namespace QueryFilters
         {
             var res = (IOrderedQueryable<T>)query;
             var step = OrderStep.First;
-            foreach (var filter in filters)
-            {
-                res = filter.GetOrderedQueryable(res, step);
-                step = OrderStep.Next;
-            }
+            if (filters != null)
+                foreach (var filter in filters)
+                {
+                    res = filter.GetOrderedQueryable(res, step);
+                    step = OrderStep.Next;
+                }
             return res;
         }
     }

@@ -25,6 +25,6 @@ namespace QueryFilters
         /// <summary>
         /// Take number of elements.
         /// </summary>
-        public int Take { get; set; } = 100;
+        public int Take { get; set; } = -1;
     }
 }
