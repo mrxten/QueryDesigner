@@ -74,14 +74,30 @@ namespace QueryFilters.Expressions
         private static readonly Type[] AvailableCastTypes =
         {
             typeof(DateTime),
+            typeof(DateTime?),
+            typeof(TimeSpan),
+            typeof(TimeSpan?),
             typeof(bool),
+            typeof(bool?),
             typeof(int),
+            typeof(int?),
+            typeof(uint),
+            typeof(uint?),
             typeof(long),
-            typeof(short),
+            typeof(long?),
+            typeof(ulong),
+            typeof(ulong?),
             typeof(Guid),
+            typeof(Guid?),
             typeof(double),
+            typeof(double?),
             typeof(float),
-            typeof(string)
+            typeof(float?),
+            typeof(decimal),
+            typeof(decimal?),
+            typeof(char),
+            typeof(char?),
+            typeof(string),
         };
 
         /// <summary>
