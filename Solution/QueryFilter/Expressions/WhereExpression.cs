@@ -3,8 +3,11 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace QueryFilters.Expressions
+namespace QueryFilter.Expressions
 {
+    /// <summary>
+    /// Constructor expressions for Where methods.
+    /// </summary>
     internal static class WhereExpression
     {
         /// <summary>

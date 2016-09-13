@@ -3,7 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace QueryFilters.Expressions
+namespace QueryFilter.Expressions
 {
     /// <summary>
     /// Sorting step.
@@ -21,6 +21,9 @@ namespace QueryFilters.Expressions
         Next
     }
 
+    /// <summary>
+    /// Constructor expressions for OrderBy and ThenBy methods.
+    /// </summary>
     internal static class OrderExpression
     {
         /// <summary>

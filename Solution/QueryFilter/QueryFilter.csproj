@@ -7,8 +7,8 @@
     <ProjectGuid>{73A85859-F2AD-44BC-B8DB-CE2E9CF12B15}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>QueryFilters</RootNamespace>
-    <AssemblyName>QueryFilters</AssemblyName>
+    <RootNamespace>QueryFilter</RootNamespace>
+    <AssemblyName>QueryFilter</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />

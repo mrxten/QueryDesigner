@@ -1,2 +1,2 @@
-# query-filters
+# QueryFilter
 On development stage.

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using QueryFilters.Expressions;
+using QueryFilter.Expressions;
 
-namespace QueryFilters
+namespace QueryFilter
 {
     /// <summary>
     /// Override Quaryable functions.
