@@ -8,7 +8,7 @@ namespace QueryFilter
     /// <summary>
     /// Override Quaryable functions.
     /// </summary>
-    public static class ExtendedQueryable
+    public static class QueryableExtensions
     {
         /// <summary>
         /// FilterContainer expression.

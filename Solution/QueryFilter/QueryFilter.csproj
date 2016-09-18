@@ -45,7 +45,7 @@
     <Compile Include="FilterContainer.cs" />
     <Compile Include="Expressions\OrderExpression.cs" />
     <Compile Include="Expressions\WhereExpression.cs" />
-    <Compile Include="ExtendedQueryable.cs" />
+    <Compile Include="QueryableExtensions.cs" />
     <Compile Include="OrderFilter.cs" />
     <Compile Include="OrderFilterType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
