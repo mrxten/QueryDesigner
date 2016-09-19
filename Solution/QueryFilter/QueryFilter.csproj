@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Expressions\OrderStep.cs" />
     <Compile Include="FilterContainer.cs" />
     <Compile Include="Expressions\OrderExpression.cs" />
     <Compile Include="Expressions\WhereExpression.cs" />

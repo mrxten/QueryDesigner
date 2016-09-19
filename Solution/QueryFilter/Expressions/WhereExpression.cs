@@ -16,9 +16,19 @@ namespace QueryFilter.Expressions
         private static readonly Type StringType = typeof(string);
 
         /// <summary>
+        /// Char type.
+        /// </summary>
+        private static readonly Type CharType = typeof(char);
+
+        /// <summary>
         /// Expression type.
         /// </summary>
-        private static readonly Type ExpType = typeof (Expression);
+        private static readonly Type ExpType = typeof(Expression);
+
+        /// <summary>
+        /// String comparison type.
+        /// </summary>
+        private static readonly Type StrCompType = typeof(StringComparison);
 
         /// <summary>
         /// Queryable type.
@@ -28,48 +38,58 @@ namespace QueryFilter.Expressions
         /// <summary>
         /// Binary AndAlso method for expression.
         /// </summary>
-        private static readonly MethodInfo AndExpMethod = ExpType.GetMethod("AndAlso", new[] { ExpType, ExpType });
+        private static readonly MethodInfo AndExpMethod = ExpType.GetRuntimeMethod("AndAlso", new[] { ExpType, ExpType });
 
         /// <summary>
         /// Binary OrElse method for expression.
         /// </summary>
-        private static readonly MethodInfo OrExpMethod = ExpType.GetMethod("OrElse", new[] { ExpType, ExpType });
+        private static readonly MethodInfo OrExpMethod = ExpType.GetRuntimeMethod("OrElse", new[] { ExpType, ExpType });
 
         /// <summary>
         /// Info about "Contains" method.
         /// </summary>
-        private static readonly MethodInfo ContainsMethod = StringType.GetMethod("Contains");
+        private static readonly MethodInfo ContainsMethod = StringType.GetRuntimeMethods().FirstOrDefault(m => m.Name == "Contains");
+
+        /// <summary>
+        /// Info about "IndexOf" method.
+        /// </summary>
+        private static readonly MethodInfo IndexOfMethod = StringType.GetRuntimeMethod("IndexOf", new[] { StringType, StrCompType });
+
+        /// <summary>
+        /// Info about "Equals" method.
+        /// </summary>
+        private static readonly MethodInfo StrEqualsMethod = StringType.GetRuntimeMethod("Equals", new[] { StringType, StrCompType });
 
         /// <summary>
         /// Info about "StartsWith" method.
         /// </summary>
-        private static readonly MethodInfo StartsMethod = StringType.GetMethod("StartsWith", new[] { typeof(string) });
+        private static readonly MethodInfo StartsMethod = StringType.GetRuntimeMethod("StartsWith", new[] { StringType, StrCompType });
 
         /// <summary>
         /// Info about "Contains" method for collection.
         /// </summary>
-        private static readonly MethodInfo CollectionContains = QueryableType.GetMethods().Single(
+        private static readonly MethodInfo CollectionContains = QueryableType.GetRuntimeMethods().Single(
                 method => method.Name == "Contains" && method.IsStatic &&
                 method.GetParameters().Length == 2);
 
         /// <summary>
         /// Info about "Any" method with one parameter for collection.
         /// </summary>
-        private static readonly MethodInfo CollectionAny = QueryableType.GetMethods().Single(
+        private static readonly MethodInfo CollectionAny = QueryableType.GetRuntimeMethods().Single(
                 method => method.Name == "Any" && method.IsStatic &&
                 method.GetParameters().Length == 1);
 
         /// <summary>
         /// Info about "Any" method with two parameter for collection.
         /// </summary>
-        private static readonly MethodInfo CollectionAny2 = typeof(Queryable).GetMethods().Single(
+        private static readonly MethodInfo CollectionAny2 = typeof(Queryable).GetRuntimeMethods().Single(
                 method => method.Name == "Any" && method.IsStatic &&
                 method.GetParameters().Length == 2);
 
         /// <summary>
         /// Info about method of constructing expressions.
         /// </summary>
-        private static readonly MethodInfo ExpressionMethod = typeof(WhereExpression).GetMethod("GetExpression");
+        private static readonly MethodInfo ExpressionMethod = typeof(WhereExpression).GetRuntimeMethods().FirstOrDefault(m => m.Name == "GetExpression");
 
         /// <summary>
         /// Available types for conversion.
@@ -177,7 +197,8 @@ namespace QueryFilter.Expressions
             Expression prop = e;
             foreach (var t in s)
             {
-                if (prop.Type.GetInterface("IEnumerable") != null)
+                var interfaces = prop.Type.GetTypeInfo().ImplementedInterfaces;
+                if (interfaces.FirstOrDefault(x => x.Name == "IEnumerable") != null)
                 {
                     var generic = ExpressionMethod.MakeGenericMethod(
                         prop.Type.GenericTypeArguments.Single());
@@ -214,11 +235,26 @@ namespace QueryFilter.Expressions
             switch (filter.FilterType)
             {
                 case WhereFilterType.Equal:
+                    if (filter.IgnoreCase && (prop.Type == StringType || prop.Type == CharType))
+                        return
+                            Expression.Call(
+                                prop,
+                                StrEqualsMethod,
+                                Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)),
+                                Expression.Constant(StringComparison.OrdinalIgnoreCase));
                     return Expression.Equal(
                         prop,
                         Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)));
 
                 case WhereFilterType.NotEqual:
+                    if (filter.IgnoreCase && (prop.Type == StringType || prop.Type == CharType))
+                        return
+                            Expression.Not(
+                                Expression.Call(
+                                    prop,
+                                    StrEqualsMethod,
+                                    Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)),
+                                    Expression.Constant(StringComparison.OrdinalIgnoreCase)));
                     return Expression.NotEqual(
                         prop,
                         Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)));
@@ -244,18 +280,37 @@ namespace QueryFilter.Expressions
                         Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)));
 
                 case WhereFilterType.Contains:
+                    if (filter.IgnoreCase)
+                        return
+                            Expression.GreaterThanOrEqual(
+                                Expression.Call(
+                                    prop,
+                                    IndexOfMethod,
+                                    Expression.Constant(filter.Value, StringType),
+                                    Expression.Constant(StringComparison.OrdinalIgnoreCase)),
+                                Expression.Constant(0));
                     return Expression.Call(prop, ContainsMethod, Expression.Constant(filter.Value, StringType));
 
                 case WhereFilterType.NotContains:
+                    if (filter.IgnoreCase)
+                        return
+                            Expression.Not(
+                                Expression.GreaterThanOrEqual(
+                                    Expression.Call(
+                                        prop,
+                                        IndexOfMethod,
+                                        Expression.Constant(filter.Value, StringType),
+                                        Expression.Constant(StringComparison.OrdinalIgnoreCase)),
+                                    Expression.Constant(0)));
                     return Expression.Not(
                         Expression.Call(prop, ContainsMethod, Expression.Constant(filter.Value, StringType)));
 
                 case WhereFilterType.StartsWith:
-                    return Expression.Call(prop, StartsMethod, Expression.Constant(filter.Value, StringType));
+                    return Expression.Call(prop, StartsMethod, Expression.Constant(filter.Value, StringType), Expression.Constant(filter.IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal));
 
                 case WhereFilterType.NotStartsWith:
                     return Expression.Not(
-                        Expression.Call(prop, StartsMethod, Expression.Constant(filter.Value, StringType)));
+                        Expression.Call(prop, StartsMethod, Expression.Constant(filter.Value, StringType), Expression.Constant(filter.IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal)));
 
                 case WhereFilterType.InCollection:
                     var cc = CollectionContains.MakeGenericMethod(((MemberExpression)prop).Type);
@@ -296,7 +351,7 @@ namespace QueryFilter.Expressions
             if (valueType == type)
                 return value;
 
-            if (type.BaseType == typeof(Enum))
+            if (type.GetTypeInfo().BaseType == typeof(Enum))
                 return Enum.Parse(type, Convert.ToString(value));
 
 
@@ -304,7 +359,7 @@ namespace QueryFilter.Expressions
             var res = Activator.CreateInstance(type);
             var argTypes = new[] { StringType, type.MakeByRefType() };
             object[] args = { s, res };
-            var tryParse = type.GetMethod("TryParse", argTypes);
+            var tryParse = type.GetRuntimeMethod("TryParse", argTypes);
 
             if (!(bool)(tryParse?.Invoke(null, args) ?? false))
                 throw new InvalidCastException($"Cannot convert value to type {type.Name}.");

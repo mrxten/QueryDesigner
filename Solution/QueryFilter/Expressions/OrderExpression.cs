@@ -6,22 +6,6 @@ using System.Reflection;
 namespace QueryFilter.Expressions
 {
     /// <summary>
-    /// Sorting step.
-    /// </summary>
-    internal enum OrderStep
-    {
-        /// <summary>
-        /// For OrderBy.
-        /// </summary>
-        First,
-
-        /// <summary>
-        /// For ThenBy.
-        /// </summary>
-        Next
-    }
-
-    /// <summary>
     /// Constructor expressions for OrderBy and ThenBy methods.
     /// </summary>
     internal static class OrderExpression
@@ -34,7 +18,7 @@ namespace QueryFilter.Expressions
         /// <summary>
         /// OrderBy method.
         /// </summary>
-        private static readonly MethodInfo QueryableOrderBy = QueryableType.GetMethods().Single(
+        private static readonly MethodInfo QueryableOrderBy = QueryableType.GetRuntimeMethods().Single(
                 method => method.Name == "OrderBy"
                         && method.IsGenericMethodDefinition
                         && method.GetGenericArguments().Length == 2
@@ -43,7 +27,7 @@ namespace QueryFilter.Expressions
         /// <summary>
         /// OrderBy desc method.
         /// </summary>
-        private static readonly MethodInfo QueryableOrderByDescending = QueryableType.GetMethods().Single(
+        private static readonly MethodInfo QueryableOrderByDescending = QueryableType.GetRuntimeMethods().Single(
                 method => method.Name == "OrderByDescending"
                         && method.IsGenericMethodDefinition
                         && method.GetGenericArguments().Length == 2
@@ -52,7 +36,7 @@ namespace QueryFilter.Expressions
         /// <summary>
         /// ThenBy method.
         /// </summary>
-        private static readonly MethodInfo QueryableThenBy = QueryableType.GetMethods().Single(
+        private static readonly MethodInfo QueryableThenBy = QueryableType.GetRuntimeMethods().Single(
                 method => method.Name == "ThenBy"
                         && method.IsGenericMethodDefinition
                         && method.GetGenericArguments().Length == 2
@@ -61,7 +45,7 @@ namespace QueryFilter.Expressions
         /// <summary>
         /// ThenBy desc method.
         /// </summary>
-        private static readonly MethodInfo QueryableThenByDescending = QueryableType.GetMethods().Single(
+        private static readonly MethodInfo QueryableThenByDescending = QueryableType.GetRuntimeMethods().Single(
                 method => method.Name == "ThenByDescending"
                         && method.IsGenericMethodDefinition
                         && method.GetGenericArguments().Length == 2
@@ -86,7 +70,7 @@ namespace QueryFilter.Expressions
             string[] spl = filter.Field.Split('.');
             for (int i = 0; i < spl.Length; i++)
             {
-                PropertyInfo pi = type.GetProperty(spl[i]);
+                PropertyInfo pi = type.GetRuntimeProperty(spl[i]);
                 expr = Expression.Property(expr, pi);
                 type = pi.PropertyType;
             }
@@ -96,7 +80,7 @@ namespace QueryFilter.Expressions
             MethodInfo m = step == OrderStep.First
                 ? filter.Order == OrderFilterType.Asc ? QueryableOrderBy : QueryableOrderByDescending
                 : filter.Order == OrderFilterType.Asc ? QueryableThenBy : QueryableThenByDescending;
-            
+
             return ((IOrderedQueryable<T>)m.MakeGenericMethod(typeof(T), type)
                 .Invoke(null, new object[] { data, lambda }));
         }
