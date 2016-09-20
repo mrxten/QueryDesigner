@@ -3,7 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace QueryFilter.Expressions
+namespace QueryDesigner.Expressions
 {
     /// <summary>
     /// Constructor expressions for OrderBy and ThenBy methods.

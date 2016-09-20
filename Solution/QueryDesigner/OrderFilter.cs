@@ -1,4 +1,4 @@
-﻿namespace QueryFilter
+﻿namespace QueryDesigner
 {
     /// <summary>
     /// Sort by the field.

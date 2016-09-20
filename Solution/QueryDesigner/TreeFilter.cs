@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace QueryFilter
+namespace QueryDesigner
 {
     /// <summary>
     /// Filters with infinite nesting and boolean operations therebetween.

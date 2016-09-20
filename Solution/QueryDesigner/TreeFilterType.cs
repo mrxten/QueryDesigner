@@ -1,4 +1,4 @@
-﻿namespace QueryFilter
+﻿namespace QueryDesigner
 {
     /// <summary>
     /// Type of operation.

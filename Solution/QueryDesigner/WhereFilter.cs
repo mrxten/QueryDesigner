@@ -1,4 +1,4 @@
-﻿namespace QueryFilter
+﻿namespace QueryDesigner
 {
     /// <summary>
     /// Tree filter for queryable expression.

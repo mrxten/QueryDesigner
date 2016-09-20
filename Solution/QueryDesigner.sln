@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryFilter", "QueryFilter\QueryFilter.csproj", "{73A85859-F2AD-44BC-B8DB-CE2E9CF12B15}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryDesigner", "QueryDesigner\QueryDesigner.csproj", "{73A85859-F2AD-44BC-B8DB-CE2E9CF12B15}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortableQueryFilter", "PortableQueryFilter\PortableQueryFilter.csproj", "{0C333011-E606-4D89-B9AE-F6B96324BC9B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortableQueryDesigner", "PortableQueryDesigner\PortableQueryDesigner.csproj", "{0C333011-E606-4D89-B9AE-F6B96324BC9B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

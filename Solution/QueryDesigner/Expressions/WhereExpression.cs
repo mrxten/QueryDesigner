@@ -3,7 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace QueryFilter.Expressions
+namespace QueryDesigner.Expressions
 {
     /// <summary>
     /// Constructor expressions for Where methods.
@@ -14,11 +14,6 @@ namespace QueryFilter.Expressions
         /// String type.
         /// </summary>
         private static readonly Type StringType = typeof(string);
-
-        /// <summary>
-        /// Char type.
-        /// </summary>
-        private static readonly Type CharType = typeof(char);
 
         /// <summary>
         /// Expression type.

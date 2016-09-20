@@ -8,8 +8,8 @@
     <ProjectGuid>{0C333011-E606-4D89-B9AE-F6B96324BC9B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PortableQueryFilter</RootNamespace>
-    <AssemblyName>PortableQueryFilter</AssemblyName>
+    <RootNamespace>QueryDesigner</RootNamespace>
+    <AssemblyName>PortableQueryDesigner</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -37,37 +37,37 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\QueryFilter\Expressions\OrderExpression.cs">
+    <Compile Include="..\QueryDesigner\Expressions\OrderExpression.cs">
       <Link>Expressions\OrderExpression.cs</Link>
     </Compile>
-    <Compile Include="..\QueryFilter\Expressions\OrderStep.cs">
+    <Compile Include="..\QueryDesigner\Expressions\OrderStep.cs">
       <Link>Expressions\OrderStep.cs</Link>
     </Compile>
-    <Compile Include="..\QueryFilter\Expressions\WhereExpression.cs">
+    <Compile Include="..\QueryDesigner\Expressions\WhereExpression.cs">
       <Link>Expressions\WhereExpression.cs</Link>
     </Compile>
-    <Compile Include="..\QueryFilter\FilterContainer.cs">
+    <Compile Include="..\QueryDesigner\FilterContainer.cs">
       <Link>FilterContainer.cs</Link>
     </Compile>
-    <Compile Include="..\QueryFilter\OrderFilter.cs">
+    <Compile Include="..\QueryDesigner\OrderFilter.cs">
       <Link>OrderFilter.cs</Link>
     </Compile>
-    <Compile Include="..\QueryFilter\OrderFilterType.cs">
+    <Compile Include="..\QueryDesigner\OrderFilterType.cs">
       <Link>OrderFilterType.cs</Link>
     </Compile>
-    <Compile Include="..\QueryFilter\QueryableExtensions.cs">
+    <Compile Include="..\QueryDesigner\QueryableExtensions.cs">
       <Link>QueryableExtensions.cs</Link>
     </Compile>
-    <Compile Include="..\QueryFilter\TreeFilter.cs">
+    <Compile Include="..\QueryDesigner\TreeFilter.cs">
       <Link>TreeFilter.cs</Link>
     </Compile>
-    <Compile Include="..\QueryFilter\TreeFilterType.cs">
+    <Compile Include="..\QueryDesigner\TreeFilterType.cs">
       <Link>TreeFilterType.cs</Link>
     </Compile>
-    <Compile Include="..\QueryFilter\WhereFilter.cs">
+    <Compile Include="..\QueryDesigner\WhereFilter.cs">
       <Link>WhereFilter.cs</Link>
     </Compile>
-    <Compile Include="..\QueryFilter\WhereFilterType.cs">
+    <Compile Include="..\QueryDesigner\WhereFilterType.cs">
       <Link>WhereFilterType.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />

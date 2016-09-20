@@ -1,4 +1,4 @@
-﻿namespace QueryFilter.Expressions
+﻿namespace QueryDesigner.Expressions
 {
     /// <summary>
     /// Sorting step.
