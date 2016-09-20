@@ -1,2 +1,2 @@
-# QueryFilter
+# QueryDesigner
 On development stage.
