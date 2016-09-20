@@ -16,11 +16,6 @@
         public WhereFilterType FilterType { get; set; }
 
         /// <summary>
-        /// Ignore case when filtering.
-        /// </summary>
-        public bool IgnoreCase { get; set; }
-
-        /// <summary>
         /// Value for filtering.
         /// </summary>
         public object Value { get; set; }

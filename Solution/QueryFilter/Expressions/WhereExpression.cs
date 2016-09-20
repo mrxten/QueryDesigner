@@ -26,11 +26,6 @@ namespace QueryFilter.Expressions
         private static readonly Type ExpType = typeof(Expression);
 
         /// <summary>
-        /// String comparison type.
-        /// </summary>
-        private static readonly Type StrCompType = typeof(StringComparison);
-
-        /// <summary>
         /// Queryable type.
         /// </summary>
         private static readonly Type QueryableType = typeof(Queryable);
@@ -51,19 +46,9 @@ namespace QueryFilter.Expressions
         private static readonly MethodInfo ContainsMethod = StringType.GetRuntimeMethods().FirstOrDefault(m => m.Name == "Contains");
 
         /// <summary>
-        /// Info about "IndexOf" method.
-        /// </summary>
-        private static readonly MethodInfo IndexOfMethod = StringType.GetRuntimeMethod("IndexOf", new[] { StringType, StrCompType });
-
-        /// <summary>
-        /// Info about "Equals" method.
-        /// </summary>
-        private static readonly MethodInfo StrEqualsMethod = StringType.GetRuntimeMethod("Equals", new[] { StringType, StrCompType });
-
-        /// <summary>
         /// Info about "StartsWith" method.
         /// </summary>
-        private static readonly MethodInfo StartsMethod = StringType.GetRuntimeMethod("StartsWith", new[] { StringType, StrCompType });
+        private static readonly MethodInfo StartsMethod = StringType.GetRuntimeMethod("StartsWith", new[] { StringType });
 
         /// <summary>
         /// Info about "Contains" method for collection.
@@ -235,26 +220,11 @@ namespace QueryFilter.Expressions
             switch (filter.FilterType)
             {
                 case WhereFilterType.Equal:
-                    if (filter.IgnoreCase && (prop.Type == StringType || prop.Type == CharType))
-                        return
-                            Expression.Call(
-                                prop,
-                                StrEqualsMethod,
-                                Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)),
-                                Expression.Constant(StringComparison.OrdinalIgnoreCase));
                     return Expression.Equal(
                         prop,
                         Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)));
 
                 case WhereFilterType.NotEqual:
-                    if (filter.IgnoreCase && (prop.Type == StringType || prop.Type == CharType))
-                        return
-                            Expression.Not(
-                                Expression.Call(
-                                    prop,
-                                    StrEqualsMethod,
-                                    Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)),
-                                    Expression.Constant(StringComparison.OrdinalIgnoreCase)));
                     return Expression.NotEqual(
                         prop,
                         Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)));
@@ -280,37 +250,18 @@ namespace QueryFilter.Expressions
                         Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)));
 
                 case WhereFilterType.Contains:
-                    if (filter.IgnoreCase)
-                        return
-                            Expression.GreaterThanOrEqual(
-                                Expression.Call(
-                                    prop,
-                                    IndexOfMethod,
-                                    Expression.Constant(filter.Value, StringType),
-                                    Expression.Constant(StringComparison.OrdinalIgnoreCase)),
-                                Expression.Constant(0));
                     return Expression.Call(prop, ContainsMethod, Expression.Constant(filter.Value, StringType));
 
                 case WhereFilterType.NotContains:
-                    if (filter.IgnoreCase)
-                        return
-                            Expression.Not(
-                                Expression.GreaterThanOrEqual(
-                                    Expression.Call(
-                                        prop,
-                                        IndexOfMethod,
-                                        Expression.Constant(filter.Value, StringType),
-                                        Expression.Constant(StringComparison.OrdinalIgnoreCase)),
-                                    Expression.Constant(0)));
                     return Expression.Not(
                         Expression.Call(prop, ContainsMethod, Expression.Constant(filter.Value, StringType)));
 
                 case WhereFilterType.StartsWith:
-                    return Expression.Call(prop, StartsMethod, Expression.Constant(filter.Value, StringType), Expression.Constant(filter.IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal));
+                    return Expression.Call(prop, StartsMethod, Expression.Constant(filter.Value, StringType));
 
                 case WhereFilterType.NotStartsWith:
                     return Expression.Not(
-                        Expression.Call(prop, StartsMethod, Expression.Constant(filter.Value, StringType), Expression.Constant(filter.IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal)));
+                        Expression.Call(prop, StartsMethod, Expression.Constant(filter.Value, StringType)));
 
                 case WhereFilterType.InCollection:
                     var cc = CollectionContains.MakeGenericMethod(((MemberExpression)prop).Type);
