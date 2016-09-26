@@ -6,6 +6,14 @@
     public class WhereFilter
     {
         /// <summary>
+        /// Tree filter for queryable expression.
+        /// </summary>
+        public WhereFilter()
+        {
+            FilterType = WhereFilterType.None;
+        }
+
+        /// <summary>
         /// Filter field name.
         /// </summary>
         public string Field { get; set; }

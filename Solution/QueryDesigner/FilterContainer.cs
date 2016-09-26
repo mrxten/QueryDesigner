@@ -8,6 +8,14 @@ namespace QueryDesigner
     public class FilterContainer
     {
         /// <summary>
+        /// Container for filters.
+        /// </summary>
+        public FilterContainer()
+        {
+            Take = -1;
+        }
+
+        /// <summary>
         /// Where filters.
         /// </summary>
         public TreeFilter Where { get; set; }
@@ -25,6 +33,6 @@ namespace QueryDesigner
         /// <summary>
         /// Take number of elements.
         /// </summary>
-        public int Take { get; set; } = -1;
+        public int Take { get; set; }
     }
 }
