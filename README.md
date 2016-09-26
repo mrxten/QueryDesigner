@@ -1,4 +1,6 @@
 # QueryDesigner
+[![NuGet](https://img.shields.io/nuget/v/querydesigner.svg?maxAge=2592000)](http://www.nuget.org/packages/QueryDesigner/)
+
 С QueryDesigner вы можете создавать сложные IQueryable фильтры. Эти фильтры строятся в деревья выражений, поэтому их можно применять как в локальных коллекциях, так и в интегрируемых запросах Entity Framework / Linq2SQL.
 Данный проект в первую очередь направлен на построение фильтров коллекций динамическим способом, полученных вне среды .NET, например с помощью JavaScript в ASP.NET.
 
@@ -174,8 +176,36 @@ Field поддерживает обращение к свойствам член
 * NotStartsWith
 * InCollection
 * NotInCollection
-* Any
-* NotAny
+* Any - применяется к коллекциям и не использует Value 
+* NotAny - аналогично с методом Any
+
+## Члены сущностей
+Доступные типы для членов сущностей, **по которым** строится фильтрация (Кроме Any и NotAny):
+* DateTime
+* DateTime?
+* TimeSpan
+* TimeSpan?
+* bool
+* bool?
+* int
+* int?
+* uint
+* uint?
+* long
+* long?
+* ulong
+* ulong?
+* Guid
+* Guid?
+* double
+* double?
+* float
+* float?
+* decimal
+* decimal?
+* char
+* char?
+* string
 
 ## Дополнительная информация
 При построении Where фильтрации используется TreeFilter, наследуемый от WhereFilter.
