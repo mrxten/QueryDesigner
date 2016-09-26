@@ -1,5 +1,5 @@
 # QueryDesigner
-[![NuGet](https://img.shields.io/nuget/v/querydesigner.svg?maxAge=2592000)](http://www.nuget.org/packages/QueryDesigner/)
+[![NuGet](https://img.shields.io/nuget/v/querydesigner.svg?maxAge=2592000&style=flat)](http://www.nuget.org/packages/QueryDesigner/)
 
 С QueryDesigner вы можете создавать сложные IQueryable фильтры. Эти фильтры строятся в деревья выражений, поэтому их можно применять как в локальных коллекциях, так и в интегрируемых запросах Entity Framework / Linq2SQL.
 Данный проект в первую очередь направлен на построение фильтров коллекций динамическим способом, полученных вне среды .NET, например с помощью JavaScript в ASP.NET.
@@ -176,10 +176,6 @@ Field поддерживает обращение к свойствам член
   * NotContains
   * StartsWith
   * NotStartsWith
-  * InCollection
-  * NotInCollection
-  * Any
-  * NotAny
 2. Применяемые к перечисляемым элементам:
   * InCollection
   * NotInCollection
