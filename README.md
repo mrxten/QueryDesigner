@@ -162,25 +162,33 @@ public class Car
 ```
 Field поддерживает обращение к свойствам членов сущностей с неограниченной вложенностью. Аналогично работает сортировка.
 
-## Поддерживаемые методы фильтрации
-На данный момент FilterType позволяет фильтровать следующими способами:
-* Equal
-* NotEqual
-* LessThan
-* GreaterThan
-* LessThanOrEqual
-* GreaterThanOrEqual
-* Contains
-* NotContains
-* StartsWith
-* NotStartsWith
-* InCollection
-* NotInCollection
-* Any - применяется к коллекциям и не использует Value 
-* NotAny - аналогично с методом Any
+## Способы фильтраций
+На данный момент FilterType позволяет фильтровать следующими методами:
 
+1. Применяемые к одиночным элементам:
+  * Equal
+  * NotEqual
+  * LessThan
+  * GreaterThan
+  * LessThanOrEqual
+  * GreaterThanOrEqual
+  * Contains
+  * NotContains
+  * StartsWith
+  * NotStartsWith
+  * InCollection
+  * NotInCollection
+  * Any
+  * NotAny
+2. Применяемые к перечисляемым элементам:
+  * InCollection
+  * NotInCollection
+3. Применяемые к перечисляемым элементам без использования Value:
+  * Any
+  * NotAny
+  
 ## Члены сущностей
-Доступные типы для членов сущностей, **по которым** строится фильтрация (Кроме Any и NotAny):
+Доступные типы для одиночных членов сущностей, **по которым** строится фильтрация:
 * DateTime
 * DateTime?
 * TimeSpan
