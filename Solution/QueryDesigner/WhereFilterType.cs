@@ -61,16 +61,6 @@
         NotStartsWith,
 
         /// <summary>
-        /// Collection contains an element.
-        /// </summary>
-        InCollection,
-
-        /// <summary>
-        /// Collection not contains an element.
-        /// </summary>
-        NotInCollection,
-
-        /// <summary>
         /// Collection contains data.
         /// </summary>
         Any,

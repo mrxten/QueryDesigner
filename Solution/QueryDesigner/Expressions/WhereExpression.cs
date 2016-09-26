@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -36,21 +37,15 @@ namespace QueryDesigner.Expressions
         private static readonly MethodInfo OrExpMethod = ExpType.GetRuntimeMethod("OrElse", new[] { ExpType, ExpType });
 
         /// <summary>
-        /// Info about "Contains" method.
-        /// </summary>
-        private static readonly MethodInfo ContainsMethod = StringType.GetRuntimeMethods().FirstOrDefault(m => m.Name == "Contains");
-
-        /// <summary>
         /// Info about "StartsWith" method.
         /// </summary>
         private static readonly MethodInfo StartsMethod = StringType.GetRuntimeMethod("StartsWith", new[] { StringType });
 
         /// <summary>
-        /// Info about "Contains" method for collection.
+        /// Info about AsQueryableMethod.
         /// </summary>
-        private static readonly MethodInfo CollectionContains = QueryableType.GetRuntimeMethods().Single(
-                method => method.Name == "Contains" && method.IsStatic &&
-                method.GetParameters().Length == 2);
+        private static readonly MethodInfo AsQueryableMethod = QueryableType.GetRuntimeMethods().FirstOrDefault(
+                method => method.Name == "AsQueryable" && method.IsStatic);
 
         /// <summary>
         /// Info about "Any" method with one parameter for collection.
@@ -175,11 +170,13 @@ namespace QueryDesigner.Expressions
                 throw new ArgumentException("Filter type cannot be None for single filter.");
             var s = filter.Field.Split('.');
             Expression prop = e;
+
             foreach (var t in s)
             {
-                var interfaces = prop.Type.GetTypeInfo().ImplementedInterfaces;
-                if (interfaces.FirstOrDefault(x => x.Name == "IEnumerable") != null)
+                if (IsEnumerable(prop))
                 {
+                    prop = AsQueryable(prop);
+
                     var generic = ExpressionMethod.MakeGenericMethod(
                         prop.Type.GenericTypeArguments.Single());
                     object[] pars = {
@@ -194,7 +191,7 @@ namespace QueryDesigner.Expressions
                     var expr = (Expression)generic.Invoke(null, pars);
                     return Expression.Call(
                         CollectionAny2.MakeGenericMethod(
-                            ((MemberExpression)prop).Type.GenericTypeArguments.First()),
+                        prop.Type.GenericTypeArguments.First()),
                         prop,
                         expr);
                 }
@@ -244,13 +241,6 @@ namespace QueryDesigner.Expressions
                         prop,
                         Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)));
 
-                case WhereFilterType.Contains:
-                    return Expression.Call(prop, ContainsMethod, Expression.Constant(filter.Value, StringType));
-
-                case WhereFilterType.NotContains:
-                    return Expression.Not(
-                        Expression.Call(prop, ContainsMethod, Expression.Constant(filter.Value, StringType)));
-
                 case WhereFilterType.StartsWith:
                     return Expression.Call(prop, StartsMethod, Expression.Constant(filter.Value, StringType));
 
@@ -258,22 +248,18 @@ namespace QueryDesigner.Expressions
                     return Expression.Not(
                         Expression.Call(prop, StartsMethod, Expression.Constant(filter.Value, StringType)));
 
-                case WhereFilterType.InCollection:
-                    var cc = CollectionContains.MakeGenericMethod(((MemberExpression)prop).Type);
-                    return Expression.Call(cc, Expression.Constant(filter.Value), prop);
-
-                case WhereFilterType.NotInCollection:
-                    var ncc = CollectionContains.MakeGenericMethod(((MemberExpression)prop).Type);
-                    return Expression.Not(Expression.Call(ncc, Expression.Constant(filter.Value), prop));
-
                 case WhereFilterType.Any:
+                    if (IsEnumerable(prop))
+                        prop = AsQueryable(prop);
                     var ca = CollectionAny.MakeGenericMethod(
-                        ((MemberExpression)prop).Type.GenericTypeArguments.First());
+                        prop.Type.GenericTypeArguments.First());
                     return Expression.Call(ca, prop);
 
                 case WhereFilterType.NotAny:
+                    if (IsEnumerable(prop))
+                        prop = AsQueryable(prop);
                     var cna = CollectionAny.MakeGenericMethod(
-                        ((MemberExpression)prop).Type.GenericTypeArguments.First());
+                        prop.Type.GenericTypeArguments.First());
                     return Expression.Not(Expression.Call(cna, prop));
 
                 default:
@@ -311,6 +297,30 @@ namespace QueryDesigner.Expressions
                 throw new InvalidCastException($"Cannot convert value to type {type.Name}.");
 
             return args[1];
+        }
+
+
+        /// <summary>
+        /// Cast IEnumerable to IQueryable.
+        /// </summary>
+        /// <param name="prop">IEnumerable expression</param>
+        /// <returns>IQueryable expression.</returns>
+        private static Expression AsQueryable(Expression prop)
+        {
+            return Expression.Call(
+                        AsQueryableMethod.MakeGenericMethod(prop.Type.GenericTypeArguments.Single()),
+                        prop);
+        }
+
+
+        /// <summary>
+        /// Expression type is IEnumerable
+        /// </summary>
+        /// <param name="prop">Verifiable expression.</param>
+        /// <returns>Result of checking.</returns>
+        public static bool IsEnumerable(Expression prop)
+        {
+            return prop.Type.GetTypeInfo().ImplementedInterfaces.FirstOrDefault(x => x.Name == "IEnumerable") != null;
         }
     }
 }
