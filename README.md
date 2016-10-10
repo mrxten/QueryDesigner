@@ -1,11 +1,10 @@
 # QueryDesigner
 [![NuGet](https://img.shields.io/nuget/v/querydesigner.svg?maxAge=259200&style=flat)](http://www.nuget.org/packages/QueryDesigner/)
 
-С QueryDesigner вы можете создавать сложные IQueryable фильтры. Эти фильтры строятся в деревья выражений, поэтому их можно применять как в локальных коллекциях, так и в интегрируемых запросах Entity Framework / Linq2SQL.
-Данный проект в первую очередь направлен на построение фильтров коллекций динамическим способом, полученных вне среды .NET, например с помощью JavaScript в ASP.NET.
+With QueryDesigner you can create complex IQueryable filters. These filters are built in expression trees, so they can be used in both local collections and integrable queries in Entity Framework or Linq2SQL. The main target of the project is to building a filtering  of collection produced outside the .NET environment, for example with javaScript in ASP.NET project, in a dynamyc way. 
 
-## Базовое использование
-Пусть мы имеем сущность пользователя...
+## Basic usage
+Let's say we have a user entity...
 ```csharp
 public class User 
 {
@@ -15,17 +14,16 @@ public class User
 }
 ```
 
-... и запрос получения всех пользователей.
+...and all users request.
 ```csharp
 IQueryable<User> query = dataAccess.MyUsers;
 ```
 
-Отлично! Теперь давайте создадим фильтр для них.
+Excellent! Now let's create a filter for them.
 
-Важно, чтобы все члены сущности, которые можно фильтровать, были **свойствами**!
-Допустим я хочу из всех пользователей получить только тех, у которых Id > 0 || ( Name == "Alex" && Age >= 21), а потом отсортировать их по Name по убыванию, после по Id по возрастанию.
+It's important that all members of the entities that could be filtered, are need to be a properties. Let's say that we want want get only those from all users that have a  Id > 0 || (Name == "Alex" && Age> = 21), and then sort them by Name descending and after - ascending by Id.
 
-Получаем вот такой фильтр:
+It turns out this filter:
 ```csharp
 var filter = new FilterContainer
             {
@@ -78,8 +76,7 @@ var filter = new FilterContainer
                 }
             };
 ```
-Where фильтр имеет древовидную структуру бесконечной вложенности, а OrderBy бесконечный листинг.
-Само собой, мы получаем довольно громоздкий код, который вряд ли кто-то будет использовать в таком виде, но, в JSON формате он весьма практичен:
+"Where" filter has a tree structure of infinite nesting, and OrderBy endless listing. Of course, we get quite uncomfortable code that will be hard for anyone who will use this form, but in JSON format it is very practical:
 ```json
 {
 	"Where": {
@@ -119,18 +116,18 @@ Where фильтр имеет древовидную структуру беск
 }
 ```
 
-Теперь применим фильтр к выборке:
+Now apply filter to fetch the data:
 ```csharp
   query = query.Request(filter);
 ```
-или
+or
 ```csharp
   query = query.Where(filter.Where).OrderBy(filter.OrderBy).Skip(filter.Skip).Take(filter.Take);
 ```
-Готово! По умолчанию, в Request методы Skip и Take не вызываются, если не заданы соответствующие поля.
+Complete! By default, the Request Skip and Take methods are not called if you do not set the appropriate fields.
 
-## Сложные типы
-Давайте расширим имеющуюся сущность пользователя и добавим еще одну:
+## Complex types
+Let's extend existing user entity and add another:
 ```csharp
 public class User 
 {
@@ -148,9 +145,9 @@ public class Car
 }
 
 ```
-Теперь каждый пользователь может иметь автомобили. Почему Cars в сущности User имеет тип **IEnumerable**, а не **IQueryable**? Это сделано только для удобства, ко всем IEnumerable коллекциям перед построением фильтра применяется метод **AsQueryable**.
+Now every user can have a car. Why Cars from User is of type IEnumerable, rather than IQueryable? This is for convenience, to all IEnumerable collections is applied AsQueryable method.
 
-Хорошо, давайте выберем из них только тех, кто имеет спорткары, способные развивать скорость выше 300км/ч, для удобства я буду писать сразу в JSON:
+Okay, now select users only from those who have sports cars capable of speeds up to 300 km / hour, for convenience I presented in JSON:
 ```json
 {
 	"Where": {
@@ -160,12 +157,12 @@ public class Car
 	}
 }
 ```
-Field поддерживает обращение к свойствам членов сущностей с неограниченной вложенностью. Аналогично работает сортировка.
+Field supports the appeal to the properties of the members of the entity with unlimited nesting. Similarly works sorting.
 
-## Способы фильтраций
-На данный момент FilterType позволяет фильтровать следующими методами:
+## Filtering methods
+Currently FilterType allows you to filter by the following ways:
 
-1. Применяемые к одиночным элементам:
+1. Applied to a single element:
   * Equal
   * NotEqual
   * LessThan
@@ -176,12 +173,12 @@ Field поддерживает обращение к свойствам член
   * NotContains
   * StartsWith
   * NotStartsWith
-2. Применяемые к перечисляемым элементам без использования Value:
+2. Applied to the listed items without using Value:
   * Any
   * NotAny
   
-## Члены сущностей
-Доступные типы для одиночных членов сущностей, **по которым** строится фильтрация:
+## Entity members
+Available types for single member entities, which are filtered:
 * DateTime
 * DateTime?
 * TimeSpan
@@ -208,8 +205,7 @@ Field поддерживает обращение к свойствам член
 * char?
 * string
 
-## Дополнительная информация
-При построении Where фильтрации используется TreeFilter, наследуемый от WhereFilter.
-Когда свойство OperatorType равняется **None**, то конструктор выражения обращается к полям реализации WhereFilter, иначе к коллекции Operands. Это позволяет строить фильтры любой вложенности.
+##Additional Information
+When building a filter using Where TreeFilter, inherited from WhereFilter. When OperatorType property is equal to None, the expression of the designer refers to the fields of implementation WhereFilter, otherwise Operands to the collection. It allows you to build any nesting filters.
 
-Если Вы заметите какие либо ошибки или у Вас есть предложения - пожалуйста, дайте мне знать. Спасибо!
+If you notice any errors or have any suggestions - please let me know. Thank you!
