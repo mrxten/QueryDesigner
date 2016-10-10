@@ -145,7 +145,7 @@ public class Car
 }
 
 ```
-Now every user can have a car. Why Cars from User is of type IEnumerable, rather than IQueryable? This is for convenience, to all IEnumerable collections is applied AsQueryable method.
+Now every user can have a car. Why Cars from User is of type **IEnumerable**, rather than **IQueryable**? This is for convenience, to all IEnumerable collections is applied **AsQueryable** method.
 
 Okay, now select users only from those who have sports cars capable of speeds up to 300 km / hour, for convenience I presented in JSON:
 ```json
@@ -178,7 +178,7 @@ Currently FilterType allows you to filter by the following ways:
   * NotAny
   
 ## Entity members
-Available types for single member entities, which are filtered:
+Available types for single member entities, **which are filtered**:
 * DateTime
 * DateTime?
 * TimeSpan
