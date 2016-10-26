@@ -314,11 +314,11 @@ namespace QueryDesigner.Expressions
 
 
         /// <summary>
-        /// Expression type is IEnumerable
+        /// Expression type is IEnumerable.
         /// </summary>
         /// <param name="prop">Verifiable expression.</param>
         /// <returns>Result of checking.</returns>
-        public static bool IsEnumerable(Expression prop)
+        private static bool IsEnumerable(Expression prop)
         {
             return prop.Type.GetTypeInfo().ImplementedInterfaces.FirstOrDefault(x => x.Name == "IEnumerable") != null;
         }
