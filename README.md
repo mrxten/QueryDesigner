@@ -21,7 +21,7 @@ IQueryable<User> query = dataAccess.MyUsers;
 
 Excellent! Now let's create a filter for them.
 
-It's important that all members of the entities that could be filtered, are need to be a properties. Let's say that we want want get only those from all users that have a  Id > 0 || (Name == "Alex" && Age> = 21), and then sort them by Name descending and after - ascending by Id.
+It's important that all members of the entities that could be filtered, are need to be a properties. Let's say that we want get only those from all users that have a  Id > 0 || (Name == "Alex" && Age> = 21), and then sort them by Name descending and after - ascending by Id.
 
 It turns out this filter:
 ```csharp
