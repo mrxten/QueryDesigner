@@ -3,6 +3,11 @@
 
 With QueryDesigner you can create complex IQueryable filters. These filters are built in expression trees, so they can be used in both local collections and integrable queries in Entity Framework or Linq2SQL. The main target of the project is to building a filtering  of collection produced outside the .NET environment, for example with javaScript in ASP.NET project, in a dynamyc way. 
 
+## Install
+```
+PM> Install-Package QueryDesigner
+```
+
 ## Basic usage
 Let's say we have a user entity...
 ```csharp
