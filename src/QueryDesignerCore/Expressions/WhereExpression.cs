@@ -274,7 +274,7 @@ namespace QueryDesignerCore.Expressions
         /// <returns>Converted value.</returns>
         private static object TryCastFieldValueType(object value, Type type)
         {
-            if (value == null || !AvailableCastTypes.Contains(type))
+            if (value == null || (!AvailableCastTypes.Contains(type) && !type.GetTypeInfo().IsEnum))
                 throw new InvalidCastException($"Cannot convert value to type {type.Name}.");
 
             var valueType = value.GetType();
