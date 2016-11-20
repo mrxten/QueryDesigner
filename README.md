@@ -81,7 +81,9 @@ var filter = new FilterContainer
                 }
             };
 ```
-"Where" filter has a tree structure of infinite nesting, and OrderBy endless listing. Of course, we get quite uncomfortable code that will be hard for anyone who will use this form, but in JSON format it is very practical:
+"Where" filter has a tree structure of infinite nesting, and OrderBy endless listing.
+**Is important! You must construct each filter with only one implementation of a class: either TreeFilter or WhereFilter.** That is, use either OperatorType and Operands or Field, FilterType and Value.
+Of course, we get quite uncomfortable code that will be hard for anyone who will use this form, but in JSON format it is very practical:
 ```json
 {
 	"Where": {
