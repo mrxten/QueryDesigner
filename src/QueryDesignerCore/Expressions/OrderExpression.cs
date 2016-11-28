@@ -1,4 +1,8 @@
-﻿using System;
+﻿//------------------------------------------------------------------
+// <author>Жуков Владислав</author>
+//------------------------------------------------------------------
+
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -70,7 +74,7 @@ namespace QueryDesignerCore.Expressions
             string[] spl = filter.Field.Split('.');
             for (int i = 0; i < spl.Length; i++)
             {
-                PropertyInfo pi = type.GetRuntimeProperty(spl[i]);
+                PropertyInfo pi = GetDeclaringProperty(type, spl[i]);
                 expr = Expression.Property(expr, pi);
                 type = pi.PropertyType;
             }
@@ -83,6 +87,22 @@ namespace QueryDesignerCore.Expressions
 
             return ((IOrderedQueryable<T>)m.MakeGenericMethod(typeof(T), type)
                 .Invoke(null, new object[] { data, lambda }));
+        }
+
+        /// <summary>
+        /// Get property from class in which it is declared.
+        /// </summary>
+        /// <param name="t">Type of entity.</param>
+        /// <param name="name">Name of property.</param>
+        /// <returns>Property info.</returns>
+        private static PropertyInfo GetDeclaringProperty(Type t, string name)
+        {
+            var p = t.GetRuntimeProperty(name);
+            if (t != p.DeclaringType)
+            {
+                p = p.DeclaringType.GetRuntimeProperty(name);
+            }
+            return p;
         }
     }
 }

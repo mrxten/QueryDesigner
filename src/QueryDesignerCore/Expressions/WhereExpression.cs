@@ -1,4 +1,8 @@
-﻿using System;
+﻿//------------------------------------------------------------------
+// <author>Жуков Владислав</author>
+//------------------------------------------------------------------
+
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -25,6 +29,7 @@ namespace QueryDesignerCore.Expressions
         /// </summary>
         private static readonly Type QueryableType = typeof(Queryable);
 
+
         /// <summary>
         /// Binary AndAlso method for expression.
         /// </summary>
@@ -39,6 +44,11 @@ namespace QueryDesignerCore.Expressions
         /// Info about "StartsWith" method.
         /// </summary>
         private static readonly MethodInfo StartsMethod = StringType.GetRuntimeMethod("StartsWith", new[] { StringType });
+
+        /// <summary>
+        /// Info about "Contains" method.
+        /// </summary>
+        private static readonly MethodInfo ContainsMethod = StringType.GetRuntimeMethod("Contains", new[] { StringType });
 
         /// <summary>
         /// Info about AsQueryableMethod.
@@ -94,7 +104,7 @@ namespace QueryDesignerCore.Expressions
             typeof(decimal?),
             typeof(char),
             typeof(char?),
-            typeof(string),
+            typeof(string)
         };
 
         /// <summary>
@@ -131,11 +141,10 @@ namespace QueryDesignerCore.Expressions
         /// <param name="filter">Tree filter for query.</param>
         /// <param name="suffix">Suffix vor variable.</param>
         /// <returns>Expression chain.</returns>
-        private static Expression GetExpressionForTreeField(ParameterExpression e, TreeFilter filter, string suffix)
+        private static Expression GetExpressionForTreeField(Expression e, TreeFilter filter, string suffix)
         {
             if (filter == null)
                 throw new ArgumentNullException(nameof(filter));
-
             if (filter.OperatorType == TreeFilterType.None)
                 return GetExpressionForField(e, filter, suffix + "0");
 
@@ -160,11 +169,11 @@ namespace QueryDesignerCore.Expressions
         /// <param name="filter">Tree filter for query.</param>
         /// <param name="suffix">Suffix vor variable.</param>
         /// <returns>Expression chain.</returns>
-        private static Expression GetExpressionForField(ParameterExpression e, WhereFilter filter, string suffix)
+        private static Expression GetExpressionForField(Expression e, WhereFilter filter, string suffix)
         {
             if (filter == null)
                 throw new ArgumentNullException(nameof(filter));
-
+            
             if (filter.FilterType == WhereFilterType.None || string.IsNullOrWhiteSpace(filter.Field))
                 throw new ArgumentException("Filter type cannot be None for single filter.");
             var s = filter.Field.Split('.');
@@ -179,13 +188,13 @@ namespace QueryDesignerCore.Expressions
                     var generic = ExpressionMethod.MakeGenericMethod(
                         prop.Type.GenericTypeArguments.Single());
                     object[] pars = {
-                        new WhereFilter
-                        {
-                            Field = t,
-                            FilterType = filter.FilterType,
-                            Value = filter.Value
-                        },
-                        suffix
+                    new WhereFilter
+                    {
+                        Field = t,
+                        FilterType = filter.FilterType,
+                        Value = filter.Value
+                    },
+                    suffix
                     };
                     var expr = (Expression)generic.Invoke(null, pars);
                     return Expression.Call(
@@ -194,7 +203,7 @@ namespace QueryDesignerCore.Expressions
                         prop,
                         expr);
                 }
-                prop = Expression.Property(prop, t);
+                prop = Expression.Property(prop, GetDeclaringProperty(prop, t));
             }
             var exp = GenerateExpressionOneField(prop, filter);
             return exp;
@@ -246,6 +255,13 @@ namespace QueryDesignerCore.Expressions
                 case WhereFilterType.NotStartsWith:
                     return Expression.Not(
                         Expression.Call(prop, StartsMethod, Expression.Constant(filter.Value, StringType)));
+
+                case WhereFilterType.Contains:
+                    return Expression.Call(prop, ContainsMethod, Expression.Constant(filter.Value, StringType));
+
+                case WhereFilterType.NotContains:
+                    return Expression.Not(
+                        Expression.Call(prop, ContainsMethod, Expression.Constant(filter.Value, StringType)));
 
                 case WhereFilterType.Any:
                     if (IsEnumerable(prop))
@@ -320,6 +336,23 @@ namespace QueryDesignerCore.Expressions
         private static bool IsEnumerable(Expression prop)
         {
             return prop.Type.GetTypeInfo().ImplementedInterfaces.FirstOrDefault(x => x.Name == "IEnumerable") != null;
+        }
+
+        /// <summary>
+        /// Get property from class in which it is declared.
+        /// </summary>
+        /// <param name="e">Parameter expression.</param>
+        /// <param name="name">Name of property.</param>
+        /// <returns>Property info.</returns>
+        private static PropertyInfo GetDeclaringProperty(Expression e, string name)
+        {
+            var t = e.Type;
+            var p = t.GetRuntimeProperty(name);
+            if (t != p.DeclaringType)
+            {
+                p = p.DeclaringType.GetRuntimeProperty(name);
+            }
+            return p;
         }
     }
 }
