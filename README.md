@@ -1,7 +1,7 @@
 # QueryDesigner
 [![NuGet](https://img.shields.io/nuget/v/querydesigner.svg?maxAge=259200&style=flat)](http://www.nuget.org/packages/QueryDesigner/)
 
-With QueryDesigner you can create complex IQueryable filters. These filters are built in expression trees, so they can be used in both local collections and integrable queries in Entity Framework or Linq2SQL. The main target of the project is to building a filtering  of collection produced outside the .NET environment, for example with javaScript in ASP.NET project, in a dynamyc way. 
+With QueryDesigner you can create complex IQueryable filters. These filters are built in expression trees, so they can be used in both local collections and integrable queries in Entity Framework or Linq2SQL. The main target of the project is to building a filtering  of collection produced outside the .NET environment, for example with JavaScript in ASP.NET project, in a dynamyc way. 
 
 ## Install
 ```
@@ -187,7 +187,7 @@ Currently FilterType allows you to filter by the following ways:
   * NotAny
   
 ## Entity members
-Available types for single member entities, **which are filtered**:
+Available types for single member entities, **which can be filtered**:
 * DateTime
 * DateTime?
 * TimeSpan
@@ -214,6 +214,7 @@ Available types for single member entities, **which are filtered**:
 * char?
 * string
 * any enumerations
+...and them Nullable analogs.
 
 ##Additional Information
 When building a filter using Where TreeFilter, inherited from WhereFilter. When OperatorType property is equal to None, the expression of the designer refers to the fields of implementation WhereFilter, otherwise Operands to the collection. It allows you to build any nesting filters.
