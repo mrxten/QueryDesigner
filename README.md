@@ -202,6 +202,7 @@ Available types for single member entities, **which can be filtered**:
 * char
 * string
 * any enumerations
+
 ...and them Nullable analogs.
 
 ##Additional Information
