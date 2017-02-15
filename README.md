@@ -189,29 +189,17 @@ Currently FilterType allows you to filter by the following ways:
 ## Entity members
 Available types for single member entities, **which can be filtered**:
 * DateTime
-* DateTime?
 * TimeSpan
-* TimeSpan?
 * bool
-* bool?
 * int
-* int?
 * uint
-* uint?
 * long
-* long?
 * ulong
-* ulong?
 * Guid
-* Guid?
 * double
-* double?
 * float
-* float?
 * decimal
-* decimal?
 * char
-* char?
 * string
 * any enumerations
 ...and them Nullable analogs.
