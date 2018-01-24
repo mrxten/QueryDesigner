@@ -26,7 +26,7 @@ IQueryable<User> query = dataAccess.MyUsers;
 
 Excellent! Now let's create a filter for them.
 
-It's important that all members of the entities that could be filtered, are need to be a properties. Let's say that we want get only those from all users that have a  Id > 0 || (Name == "Alex" && Age> = 21), and then sort them by Name descending and after - ascending by Id.
+It's important that all members of the entities that could be filtered, should be a properties. Let's say that we want get only users which have Id > 0 || (Name == "Alex" && Age> = 21), and then sort them by Name descending and after - ascending by Id.
 
 It turns out this filter:
 ```csharp
@@ -85,7 +85,7 @@ var filter = new FilterContainer
 
 **Is important: you must construct each filter with only one implementation of a class: either TreeFilter or WhereFilter.** That is, use either OperatorType and Operands or Field, FilterType and Value.
 
-Of course, we get quite uncomfortable code that will be hard for anyone who will use this form, but in JSON format it is very practical:
+Of course, we got quite uncomfortable code for anyone who will use this form, but in JSON format it is very practical:
 ```json
 {
 	"Where": {
@@ -154,7 +154,7 @@ public class Car
 }
 
 ```
-Now every user can have a car. Why Cars from User is of type **IEnumerable**, rather than **IQueryable**? This is for convenience, to all IEnumerable collections is applied **AsQueryable** method.
+Now every user can have cars. Why Cars from User is of type **IEnumerable**, rather than **IQueryable**? This is for convenience, to all IEnumerable collections is applied **AsQueryable** method.
 
 Okay, now select users only from those who have sports cars capable of speeds up to 300 km / hour, for convenience I presented in JSON:
 ```json
@@ -203,7 +203,7 @@ Available types for single member entities, **which can be filtered**:
 * string
 * any enumerations
 
-...and them Nullable analogs.
+...and them Nullable analogues.
 
 ##Additional Information
 When building a filter using Where TreeFilter, inherited from WhereFilter. When OperatorType property is equal to None, the expression of the designer refers to the fields of implementation WhereFilter, otherwise Operands to the collection. It allows you to build any nesting filters.
