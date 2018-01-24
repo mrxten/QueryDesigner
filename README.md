@@ -156,7 +156,7 @@ public class Car
 ```
 Now every user can have cars. Why Cars from User is of type **IEnumerable**, rather than **IQueryable**? This is for convenience, to all IEnumerable collections is applied **AsQueryable** method.
 
-Okay, now select users only from those who have sports cars capable of speeds up to 300 km / hour, for convenience I presented in JSON:
+Okay, now select users only who have sport cars capable of speeds up to 300 km / hour, for convenience I presented in JSON:
 ```json
 {
 	"Where": {
