@@ -1,7 +1,7 @@
 # QueryDesigner
 [![NuGet](https://img.shields.io/nuget/v/querydesigner.svg?maxAge=259200&style=flat)](http://www.nuget.org/packages/QueryDesigner/)
 
-With QueryDesigner you can create complex IQueryable filters. These filters are built in expression trees, so they can be used in both local collections and integrable queries in Entity Framework or Linq2SQL. The main target of the project is to building a filtering  of collection produced outside the .NET environment, for example with JavaScript in ASP.NET project, in a dynamyc way. 
+With QueryDesigner you can create complex IQueryable filters. These filters are built in expression trees, so they can be used in both local collections and integrable queries in Entity Framework or Linq2SQL. The main target of the project is to building a filtering  of collection produced outside the .NET environment, for example with JavaScript in ASP.NET project, in a dynamic way. 
 
 ## Install
 ```
