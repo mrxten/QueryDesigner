@@ -1,8 +1,4 @@
-﻿//------------------------------------------------------------------
-// <author>Жуков Владислав</author>
-//------------------------------------------------------------------
-
-using System;
+﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -86,6 +82,12 @@ namespace QueryDesignerCore.Expressions
             typeof(TimeSpan?),
             typeof(bool),
             typeof(bool?),
+            typeof(byte?),
+            typeof(sbyte?),
+            typeof(short),
+            typeof(short?),
+            typeof(ushort),
+            typeof(ushort?),
             typeof(int),
             typeof(int?),
             typeof(uint),
@@ -222,32 +224,32 @@ namespace QueryDesignerCore.Expressions
                 case WhereFilterType.Equal:
                     return Expression.Equal(
                         prop,
-                        Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)));
+                        ToConstantExpressionOfType(TryCastFieldValueType(filter.Value, prop.Type), prop.Type));
 
                 case WhereFilterType.NotEqual:
                     return Expression.NotEqual(
                         prop,
-                        Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)));
+                        ToConstantExpressionOfType(TryCastFieldValueType(filter.Value, prop.Type), prop.Type));
 
                 case WhereFilterType.LessThan:
                     return Expression.LessThan(
                         prop,
-                        Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)));
+                        ToConstantExpressionOfType(TryCastFieldValueType(filter.Value, prop.Type), prop.Type));
 
                 case WhereFilterType.GreaterThan:
                     return Expression.GreaterThan(
                         prop,
-                        Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)));
+                        ToConstantExpressionOfType(TryCastFieldValueType(filter.Value, prop.Type), prop.Type));
 
                 case WhereFilterType.LessThanOrEqual:
                     return Expression.LessThanOrEqual(
                         prop,
-                        Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)));
+                        ToConstantExpressionOfType(TryCastFieldValueType(filter.Value, prop.Type), prop.Type));
 
                 case WhereFilterType.GreaterThanOrEqual:
                     return Expression.GreaterThanOrEqual(
                         prop,
-                        Expression.Constant(TryCastFieldValueType(filter.Value, prop.Type)));
+                        ToConstantExpressionOfType(TryCastFieldValueType(filter.Value, prop.Type), prop.Type));
 
                 case WhereFilterType.StartsWith:
                     return Expression.Call(prop, StartsMethod, Expression.Constant(filter.Value, StringType));
@@ -303,7 +305,18 @@ namespace QueryDesignerCore.Expressions
 
 
             var s = Convert.ToString(value);
-            var res = Activator.CreateInstance(type);
+            object res; 
+
+            if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                type = type.GenericTypeArguments[0];
+                res = Activator.CreateInstance(typeof(Nullable<>).MakeGenericType(type));
+            }
+            else 
+            {
+               res = Activator.CreateInstance(type);
+            }
+
             var argTypes = new[] { StringType, type.MakeByRefType() };
             object[] args = { s, res };
             var tryParse = type.GetRuntimeMethod("TryParse", argTypes);
@@ -312,6 +325,19 @@ namespace QueryDesignerCore.Expressions
                 throw new InvalidCastException($"Cannot convert value to type {type.Name}.");
 
             return args[1];
+        }
+
+        /// <summary>
+        /// Converter to an nullable expression type.
+        /// </summary>
+        /// <returns>The constant expression of type.</returns>
+        /// <param name="obj">Filter value.</param>
+        /// <param name="type">Conversion to type.</param>
+        private static Expression ToConstantExpressionOfType(object obj, Type type) {
+            if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+                return Expression.Convert(Expression.Constant(obj), type);
+
+            return Expression.Constant(obj);
         }
 
 
