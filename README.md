@@ -203,7 +203,7 @@ Available types for single member entities, **which can be filtered**:
 * string
 * any enumerations
 
-...and them Nullable analogues.
+...and their Nullable versions.
 
 ##Additional Information
 When building a filter using Where TreeFilter, inherited from WhereFilter. When OperatorType property is equal to None, the expression of the designer refers to the fields of implementation WhereFilter, otherwise Operands to the collection. It allows you to build any nesting filters.
