@@ -11,7 +11,7 @@
     <description>QueryDesigner provides way of creating complex IQueryable filtering based on dynamic expression trees.</description>
     <releaseNotes>Fix bugs with comparision types, add available cast types.</releaseNotes>
     <copyright>Copyright 2018</copyright>
-    <tags>linq quesry filtering entity-framework</tags>
+    <tags>linq query filtering entity-framework</tags>
   </metadata>
 	<files>
 	  <!--NETStandard-->
