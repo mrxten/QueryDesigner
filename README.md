@@ -191,6 +191,10 @@ Available types for single member entities, **which can be filtered**:
 * DateTime
 * TimeSpan
 * bool
+* byte
+* sbyte
+* short
+* ushort
 * int
 * uint
 * long
