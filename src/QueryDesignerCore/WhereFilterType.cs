@@ -68,6 +68,36 @@
         /// <summary>
         /// Collection not contains data.
         /// </summary>
-        NotAny
+        NotAny,
+
+        /// <summary>
+        /// The field is null
+        /// </summary>
+        IsNull,
+
+        /// <summary>
+        /// The field is not null
+        /// </summary>
+        IsNotNull,
+
+        /// <summary>
+        /// The field is empty
+        /// </summary>
+        IsEmpty,
+
+        /// <summary>
+        /// The field is not empty
+        /// </summary>
+        IsNotEmpty,
+
+        /// <summary>
+        /// The field is null or empty
+        /// </summary>
+        IsNullOrEmpty,
+
+        /// <summary>
+        /// The field is not null or empty
+        /// </summary>
+        IsNotNullOrEmpty
     }
 }

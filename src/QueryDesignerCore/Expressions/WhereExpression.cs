@@ -175,7 +175,7 @@ namespace QueryDesignerCore.Expressions
         {
             if (filter == null)
                 throw new ArgumentNullException(nameof(filter));
-            
+
             if (filter.FilterType == WhereFilterType.None || string.IsNullOrWhiteSpace(filter.Field))
                 throw new ArgumentException("Filter type cannot be None for single filter.");
             var s = filter.Field.Split('.');
@@ -279,6 +279,39 @@ namespace QueryDesignerCore.Expressions
                         prop.Type.GenericTypeArguments.First());
                     return Expression.Not(Expression.Call(cna, prop));
 
+                case WhereFilterType.IsNull:
+                    return Expression.Equal(prop, ToConstantExpressionOfType(null, prop.Type));
+
+                case WhereFilterType.IsNotNull:
+                    return Expression.Not(
+                        Expression.Equal(prop, ToConstantExpressionOfType(null, prop.Type)));
+
+                case WhereFilterType.IsEmpty:
+                    if (prop.Type != typeof(string))
+                        throw new InvalidCastException($"{filter.FilterType} can be applied to String type only");
+                    return Expression.Equal(prop, ToConstantExpressionOfType(string.Empty, prop.Type));
+
+                case WhereFilterType.IsNotEmpty:
+                    if (prop.Type != typeof(string))
+                        throw new InvalidCastException($"{filter.FilterType} can be applied to String type only");
+                    return Expression.Not(
+                        Expression.Equal(prop, ToConstantExpressionOfType(string.Empty, prop.Type)));
+
+                case WhereFilterType.IsNullOrEmpty:
+                    if (prop.Type != typeof(string))
+                        throw new InvalidCastException($"{filter.FilterType} can be applied to String type only");
+                    return Expression.OrElse(
+                        Expression.Equal(prop, ToConstantExpressionOfType(null, prop.Type)),
+                        Expression.Equal(prop, ToConstantExpressionOfType(string.Empty, prop.Type)));
+
+                case WhereFilterType.IsNotNullOrEmpty:
+                    if (prop.Type != typeof(string))
+                        throw new InvalidCastException($"{filter.FilterType} can be applied to String type only");
+                    return Expression.Not(
+                        Expression.OrElse(
+                            Expression.Equal(prop, ToConstantExpressionOfType(null, prop.Type)),
+                            Expression.Equal(prop, ToConstantExpressionOfType(string.Empty, prop.Type))));
+
                 default:
                     return prop;
             }
@@ -305,16 +338,16 @@ namespace QueryDesignerCore.Expressions
 
 
             var s = Convert.ToString(value);
-            object res; 
+            object res;
 
             if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
                 type = type.GenericTypeArguments[0];
                 res = Activator.CreateInstance(typeof(Nullable<>).MakeGenericType(type));
             }
-            else 
+            else
             {
-               res = Activator.CreateInstance(type);
+                res = Activator.CreateInstance(type);
             }
 
             var argTypes = new[] { StringType, type.MakeByRefType() };
@@ -333,7 +366,8 @@ namespace QueryDesignerCore.Expressions
         /// <returns>The constant expression of type.</returns>
         /// <param name="obj">Filter value.</param>
         /// <param name="type">Conversion to type.</param>
-        private static Expression ToConstantExpressionOfType(object obj, Type type) {
+        private static Expression ToConstantExpressionOfType(object obj, Type type)
+        {
             if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
                 return Expression.Convert(Expression.Constant(obj), type);
 
