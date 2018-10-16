@@ -47,6 +47,11 @@ namespace QueryDesignerCore.Expressions
         private static readonly MethodInfo ContainsMethod = StringType.GetRuntimeMethod("Contains", new[] { StringType });
 
         /// <summary>
+        /// Info about "EndsWith" method.
+        /// </summary>
+        private static readonly MethodInfo EndsMethod = StringType.GetRuntimeMethod("EndsWith", new[] { StringType });
+
+        /// <summary>
         /// Info about AsQueryableMethod.
         /// </summary>
         private static readonly MethodInfo AsQueryableMethod = QueryableType.GetRuntimeMethods().FirstOrDefault(
@@ -264,6 +269,13 @@ namespace QueryDesignerCore.Expressions
                 case WhereFilterType.NotContains:
                     return Expression.Not(
                         Expression.Call(prop, ContainsMethod, Expression.Constant(filter.Value, StringType)));
+
+                case WhereFilterType.EndsWith:
+                    return Expression.Call(prop, EndsMethod, Expression.Constant(filter.Value, StringType));
+
+                case WhereFilterType.NotEndsWith:
+                    return Expression.Not(
+                        Expression.Call(prop, EndsMethod, Expression.Constant(filter.Value, StringType)));
 
                 case WhereFilterType.Any:
                     if (IsEnumerable(prop))

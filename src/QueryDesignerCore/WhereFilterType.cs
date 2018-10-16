@@ -61,6 +61,16 @@
         NotStartsWith,
 
         /// <summary>
+        /// The field is end with value.
+        /// </summary>
+        EndsWith,
+
+        /// <summary>
+        /// The field is not end with value.
+        /// </summary>
+        NotEndsWith,
+
+        /// <summary>
         /// Collection contains data.
         /// </summary>
         Any,
