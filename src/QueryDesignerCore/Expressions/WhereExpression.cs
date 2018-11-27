@@ -420,6 +420,12 @@ namespace QueryDesignerCore.Expressions
         {
             var t = e.Type;
             var p = t.GetRuntimeProperty(name);
+
+            if (p == null)
+            {
+                throw new InvalidOperationException(string.Format("Property '{0}' not found on type '{1}'", name, t));
+            }
+
             if (t != p.DeclaringType)
             {
                 p = p.DeclaringType.GetRuntimeProperty(name);
