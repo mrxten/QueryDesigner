@@ -93,10 +93,10 @@ namespace QueryDesignerCore.Expressions
         /// <returns>Property info.</returns>
         private static PropertyInfo GetDeclaringProperty(Type t, string name)
         {
-            var p = t.GetRuntimeProperty(name);
+            var p = t.GetRuntimeProperties().SingleOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
             if (t != p.DeclaringType)
             {
-                p = p.DeclaringType.GetRuntimeProperty(name);
+                p = p.DeclaringType.GetRuntimeProperties().SingleOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
             }
             return p;
         }
