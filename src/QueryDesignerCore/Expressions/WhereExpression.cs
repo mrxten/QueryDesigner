@@ -419,16 +419,16 @@ namespace QueryDesignerCore.Expressions
         private static PropertyInfo GetDeclaringProperty(Expression e, string name)
         {
             var t = e.Type;
-            var p = t.GetRuntimeProperty(name);
+            var p = t.GetRuntimeProperties().SingleOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
             if (p == null)
             {
                 throw new InvalidOperationException(string.Format("Property '{0}' not found on type '{1}'", name, t));
             }
-
+          
             if (t != p.DeclaringType)
             {
-                p = p.DeclaringType.GetRuntimeProperty(name);
+                p = p.DeclaringType.GetRuntimeProperties().SingleOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
             }
             return p;
         }
