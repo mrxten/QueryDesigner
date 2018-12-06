@@ -94,6 +94,12 @@ namespace QueryDesignerCore.Expressions
         private static PropertyInfo GetDeclaringProperty(Type t, string name)
         {
             var p = t.GetRuntimeProperty(name);
+
+            if (p == null)
+            {
+                throw new InvalidOperationException(string.Format("Property '{0}' not found on type '{1}'", name, t));
+            }
+
             if (t != p.DeclaringType)
             {
                 p = p.DeclaringType.GetRuntimeProperty(name);
