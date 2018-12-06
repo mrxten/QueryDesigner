@@ -47,6 +47,11 @@ namespace QueryDesignerCore.Expressions
         private static readonly MethodInfo ContainsMethod = StringType.GetRuntimeMethod("Contains", new[] { StringType });
 
         /// <summary>
+        /// Info about "EndsWith" method.
+        /// </summary>
+        private static readonly MethodInfo EndsMethod = StringType.GetRuntimeMethod("EndsWith", new[] { StringType });
+
+        /// <summary>
         /// Info about AsQueryableMethod.
         /// </summary>
         private static readonly MethodInfo AsQueryableMethod = QueryableType.GetRuntimeMethods().FirstOrDefault(
@@ -175,7 +180,7 @@ namespace QueryDesignerCore.Expressions
         {
             if (filter == null)
                 throw new ArgumentNullException(nameof(filter));
-            
+
             if (filter.FilterType == WhereFilterType.None || string.IsNullOrWhiteSpace(filter.Field))
                 throw new ArgumentException("Filter type cannot be None for single filter.");
             var s = filter.Field.Split('.');
@@ -265,6 +270,13 @@ namespace QueryDesignerCore.Expressions
                     return Expression.Not(
                         Expression.Call(prop, ContainsMethod, Expression.Constant(filter.Value, StringType)));
 
+                case WhereFilterType.EndsWith:
+                    return Expression.Call(prop, EndsMethod, Expression.Constant(filter.Value, StringType));
+
+                case WhereFilterType.NotEndsWith:
+                    return Expression.Not(
+                        Expression.Call(prop, EndsMethod, Expression.Constant(filter.Value, StringType)));
+
                 case WhereFilterType.Any:
                     if (IsEnumerable(prop))
                         prop = AsQueryable(prop);
@@ -278,6 +290,39 @@ namespace QueryDesignerCore.Expressions
                     var cna = CollectionAny.MakeGenericMethod(
                         prop.Type.GenericTypeArguments.First());
                     return Expression.Not(Expression.Call(cna, prop));
+
+                case WhereFilterType.IsNull:
+                    return Expression.Equal(prop, ToConstantExpressionOfType(null, prop.Type));
+
+                case WhereFilterType.IsNotNull:
+                    return Expression.Not(
+                        Expression.Equal(prop, ToConstantExpressionOfType(null, prop.Type)));
+
+                case WhereFilterType.IsEmpty:
+                    if (prop.Type != typeof(string))
+                        throw new InvalidCastException($"{filter.FilterType} can be applied to String type only");
+                    return Expression.Equal(prop, ToConstantExpressionOfType(string.Empty, prop.Type));
+
+                case WhereFilterType.IsNotEmpty:
+                    if (prop.Type != typeof(string))
+                        throw new InvalidCastException($"{filter.FilterType} can be applied to String type only");
+                    return Expression.Not(
+                        Expression.Equal(prop, ToConstantExpressionOfType(string.Empty, prop.Type)));
+
+                case WhereFilterType.IsNullOrEmpty:
+                    if (prop.Type != typeof(string))
+                        throw new InvalidCastException($"{filter.FilterType} can be applied to String type only");
+                    return Expression.OrElse(
+                        Expression.Equal(prop, ToConstantExpressionOfType(null, prop.Type)),
+                        Expression.Equal(prop, ToConstantExpressionOfType(string.Empty, prop.Type)));
+
+                case WhereFilterType.IsNotNullOrEmpty:
+                    if (prop.Type != typeof(string))
+                        throw new InvalidCastException($"{filter.FilterType} can be applied to String type only");
+                    return Expression.Not(
+                        Expression.OrElse(
+                            Expression.Equal(prop, ToConstantExpressionOfType(null, prop.Type)),
+                            Expression.Equal(prop, ToConstantExpressionOfType(string.Empty, prop.Type))));
 
                 default:
                     return prop;
@@ -305,16 +350,16 @@ namespace QueryDesignerCore.Expressions
 
 
             var s = Convert.ToString(value);
-            object res; 
+            object res;
 
             if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
                 type = type.GenericTypeArguments[0];
                 res = Activator.CreateInstance(typeof(Nullable<>).MakeGenericType(type));
             }
-            else 
+            else
             {
-               res = Activator.CreateInstance(type);
+                res = Activator.CreateInstance(type);
             }
 
             var argTypes = new[] { StringType, type.MakeByRefType() };
@@ -333,7 +378,8 @@ namespace QueryDesignerCore.Expressions
         /// <returns>The constant expression of type.</returns>
         /// <param name="obj">Filter value.</param>
         /// <param name="type">Conversion to type.</param>
-        private static Expression ToConstantExpressionOfType(object obj, Type type) {
+        private static Expression ToConstantExpressionOfType(object obj, Type type)
+        {
             if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
                 return Expression.Convert(Expression.Constant(obj), type);
 
@@ -374,6 +420,12 @@ namespace QueryDesignerCore.Expressions
         {
             var t = e.Type;
             var p = t.GetRuntimeProperties().SingleOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+
+            if (p == null)
+            {
+                throw new InvalidOperationException(string.Format("Property '{0}' not found on type '{1}'", name, t));
+            }
+          
             if (t != p.DeclaringType)
             {
                 p = p.DeclaringType.GetRuntimeProperties().SingleOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
