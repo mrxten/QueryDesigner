@@ -31,55 +31,55 @@ It's important that all members of the entities that could be filtered, should b
 It turns out this filter:
 ```csharp
 var filter = new FilterContainer
-            {
-                Where = new TreeFilter
-                {
-                    OperatorType = TreeFilterType.Or,
-                    Operands = new List<TreeFilter>
-                    {
-                        new TreeFilter
-                        {
-                            Field = "Id",
-                            FilterType = WhereFilterType.GreaterThan,
-                            Value = 0
-                        },
+    {
+	Where = new TreeFilter
+	{
+	    OperatorType = TreeFilterType.Or,
+	    Operands = new List<TreeFilter>
+	    {
+		new TreeFilter
+		{
+		    Field = "Id",
+		    FilterType = WhereFilterType.GreaterThan,
+		    Value = 0
+		},
 
-                        new TreeFilter
-                        {
-                            OperatorType = TreeFilterType.And,
-                            Operands = new List<TreeFilter>
-                            {
-                                new TreeFilter
-                                {
-                                    Field = "Name",
-                                    FilterType = WhereFilterType.Equal,
-                                    Value = "Alex"
-                                },
-                                new TreeFilter
-                                {
-                                    Field = "Age",
-                                    FilterType = WhereFilterType.GreaterThanOrEqual,
-                                    Value = 21
-                                }
-                            }
-                        }
-                    }
-                },
+		new TreeFilter
+		{
+		    OperatorType = TreeFilterType.And,
+		    Operands = new List<TreeFilter>
+		    {
+			new TreeFilter
+			{
+			    Field = "Name",
+			    FilterType = WhereFilterType.Equal,
+			    Value = "Alex"
+			},
+			new TreeFilter
+			{
+			    Field = "Age",
+			    FilterType = WhereFilterType.GreaterThanOrEqual,
+			    Value = 21
+			}
+		    }
+		}
+	    }
+	},
 
-                OrderBy = new List<OrderFilter>
-                {
-                    new OrderFilter
-                    {
-                        Field = "Name",
-                        Order = OrderFilterType.Desc
-                    },
+	OrderBy = new List<OrderFilter>
+	{
+	    new OrderFilter
+	    {
+		Field = "Name",
+		Order = OrderFilterType.Desc
+	    },
 
-                    new OrderFilter
-                    {
-                        Field = "Id",
-                    }
-                }
-            };
+	    new OrderFilter
+	    {
+		Field = "Id",
+	    }
+	}
+    };
 ```
 "Where" filter has a tree structure of infinite nesting, and OrderBy endless listing.
 
@@ -87,41 +87,41 @@ var filter = new FilterContainer
 
 Of course, we got quite uncomfortable code for anyone who will use this form, but in JSON format it is very practical:
 ```json
-{
-	"Where": {
-		"OperatorType": "Or",
-		"Operands": [
-			{
-				"Field": "Id",
-				"FilterType": "GreaterThan",
-				"Value": 0
-			},
-			{
-				"OperatorType": "And",
-				"Operands": [
-				  {
-				    "Field": "Name",
-				    "FilterType": "Equal",
-				    "Value": "Alex"
-				  },
-				  {
-				    "Field": "Age",
-				    "FilterType": "GreaterThanOrEqual",
-				    "Value": 21
-				  }
-				]
-			}
-		]
-	},
-	"OrderBy": [
-		{
-			"Field": "Name",
-		},
-		{
-			"Field": "Flag",
-			"Order": "Desc"
-		}
-	],
+{  
+   "Where":{  
+      "OperatorType":"Or",
+      "Operands":[  
+         {  
+            "Field":"Id",
+            "FilterType":"GreaterThan",
+            "Value":0
+         },
+         {  
+            "OperatorType":"And",
+            "Operands":[  
+               {  
+                  "Field":"Name",
+                  "FilterType":"Equal",
+                  "Value":"Alex"
+               },
+               {  
+                  "Field":"Age",
+                  "FilterType":"GreaterThanOrEqual",
+                  "Value":21
+               }
+            ]
+         }
+      ]
+   },
+   "OrderBy":[  
+      {  
+         "Field":"Name"
+      },
+      {  
+         "Field":"Flag",
+         "Order":"Desc"
+      }
+   ]
 }
 ```
 
@@ -140,17 +140,17 @@ Let's extend existing user entity and add another:
 ```csharp
 public class User 
 {
-  public int Id { get; set; }
-  public string Name { get; set; }
-  public int Age { get; set; }
-  public IEnumerable<Car> Cars { get; set; }
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public int Age { get; set; }
+    public IEnumerable<Car> Cars { get; set; }
 }
 
 public class Car
 {
-  public int CarId { get; set; }
-  public string Model { get; set; } 
-  public int MaxSpeed { get; set; }
+    public int CarId { get; set; }
+    public string Model { get; set; } 
+    public int MaxSpeed { get; set; }
 }
 
 ```
@@ -158,12 +158,12 @@ Now every user can have cars. Why Cars from User is of type **IEnumerable**, rat
 
 Okay, now select users only who have sport cars capable of speeds up to 300 km / hour, for convenience I presented in JSON:
 ```json
-{
-	"Where": {
-		"Field": "Cars.MaxSpeed",
-		"FilterType": "GreaterThan",
-		"Value": 300
-	}
+{  
+   "Where":{  
+      "Field":"Cars.MaxSpeed",
+      "FilterType":"GreaterThan",
+      "Value":300
+   }
 }
 ```
 Field supports the appeal to the properties of the members of the entity with unlimited nesting. Similarly works sorting.
