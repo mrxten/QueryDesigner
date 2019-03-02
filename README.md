@@ -13,9 +13,9 @@ Let's say we have a user entity...
 ```csharp
 public class User 
 {
-  public int Id { get; set; }
-  public string Name { get; set; }
-  public int Age { get; set; }
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public int Age { get; set; }
 }
 ```
 
