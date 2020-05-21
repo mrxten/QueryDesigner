@@ -185,7 +185,8 @@ namespace QueryDesignerCore.Expressions
                 throw new ArgumentException("Filter type cannot be None for single filter.");
             var s = filter.Field.Split('.');
             Expression prop = e;
-
+            
+            string prev = "";
             foreach (var t in s)
             {
                 if (IsEnumerable(prop))
@@ -194,10 +195,17 @@ namespace QueryDesignerCore.Expressions
 
                     var generic = ExpressionMethod.MakeGenericMethod(
                         prop.Type.GenericTypeArguments.Single());
+                    
+                    string temp = String.Join(".",s);
+                    int index = temp.IndexOf(prev);
+                    string c = (index < 0)
+                        ? sourceString
+                        : sourceString.Remove(index, prev.Length + 1);
+                    
                     object[] pars = {
                     new WhereFilter
                     {
-                        Field = t,
+                        Field = c,
                         FilterType = filter.FilterType,
                         Value = filter.Value
                     },
@@ -211,6 +219,7 @@ namespace QueryDesignerCore.Expressions
                         expr);
                 }
                 prop = Expression.Property(prop, GetDeclaringProperty(prop, t));
+                prev = t;
             }
             var exp = GenerateExpressionOneField(prop, filter);
             return exp;
