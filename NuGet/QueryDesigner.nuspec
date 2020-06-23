@@ -2,21 +2,21 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id> QueryDesigner </id>
-    <version>2.1.0-pre</version>
+    <version>3.0.0</version>
     <authors>Vladislav Zhukov</authors>
     <owners>mrxten</owners>
     <licenseUrl>https://raw.githubusercontent.com/mrxten/QueryDesigner/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/mrxten/QueryDesigner</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>QueryDesigner provides way of creating complex IQueryable filtering based on dynamic expression trees.</description>
-    <releaseNotes>Fix bugs with comparision types, add available cast types.</releaseNotes>
-    <copyright>Copyright 2018</copyright>
+    <releaseNotes>Up version to netstandart2.0</releaseNotes>
+    <copyright>Copyright 2020</copyright>
     <tags>linq query filtering entity-framework</tags>
   </metadata>
 	<files>
 	  <!--NETStandard-->
-	  <file src="..\src\QueryDesignerCore\bin\Release\netstandard1.6\QueryDesignerCore.dll" target="lib\netstandard1.6" />
-	  <file src="..\src\QueryDesignerCore\bin\Release\netstandard1.6\QueryDesignerCore.pdb" target="lib\netstandard1.6" />
-	  <file src="..\src\QueryDesignerCore\bin\Release\netstandard1.6\QueryDesignerCore.xml" target="lib\netstandard1.6" />
+	  <file src="..\src\QueryDesignerCore\bin\Release\netstandard2.0\QueryDesignerCore.dll" target="lib\netstandard2.0" />
+	  <file src="..\src\QueryDesignerCore\bin\Release\netstandard2.0\QueryDesignerCore.pdb" target="lib\netstandard2.0" />
+	  <file src="..\src\QueryDesignerCore\bin\Release\netstandard2.0\QueryDesignerCore.xml" target="lib\netstandard2.0" />
 	</files>
 </package>
