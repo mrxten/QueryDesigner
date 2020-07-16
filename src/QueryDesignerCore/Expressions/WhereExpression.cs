@@ -231,32 +231,32 @@ namespace QueryDesignerCore.Expressions
                 case WhereFilterType.Equal:
                     return Expression.Equal(
                         prop,
-                        ToConstantExpressionOfType(TryCastFieldValueType(filter.Value, prop.Type), prop.Type));
+                        ToStaticParameterExpressionOfType(TryCastFieldValueType(filter.Value, prop.Type), prop.Type));
 
                 case WhereFilterType.NotEqual:
                     return Expression.NotEqual(
                         prop,
-                        ToConstantExpressionOfType(TryCastFieldValueType(filter.Value, prop.Type), prop.Type));
+                        ToStaticParameterExpressionOfType(TryCastFieldValueType(filter.Value, prop.Type), prop.Type));
 
                 case WhereFilterType.LessThan:
                     return Expression.LessThan(
                         prop,
-                        ToConstantExpressionOfType(TryCastFieldValueType(filter.Value, prop.Type), prop.Type));
+                        ToStaticParameterExpressionOfType(TryCastFieldValueType(filter.Value, prop.Type), prop.Type));
 
                 case WhereFilterType.GreaterThan:
                     return Expression.GreaterThan(
                         prop,
-                        ToConstantExpressionOfType(TryCastFieldValueType(filter.Value, prop.Type), prop.Type));
+                        ToStaticParameterExpressionOfType(TryCastFieldValueType(filter.Value, prop.Type), prop.Type));
 
                 case WhereFilterType.LessThanOrEqual:
                     return Expression.LessThanOrEqual(
                         prop,
-                        ToConstantExpressionOfType(TryCastFieldValueType(filter.Value, prop.Type), prop.Type));
+                        ToStaticParameterExpressionOfType(TryCastFieldValueType(filter.Value, prop.Type), prop.Type));
 
                 case WhereFilterType.GreaterThanOrEqual:
                     return Expression.GreaterThanOrEqual(
                         prop,
-                        ToConstantExpressionOfType(TryCastFieldValueType(filter.Value, prop.Type), prop.Type));
+                        ToStaticParameterExpressionOfType(TryCastFieldValueType(filter.Value, prop.Type), prop.Type));
 
                 case WhereFilterType.StartsWith:
                     return Expression.Call(prop, StartsMethod, Expression.Constant(filter.Value, StringType));
@@ -294,37 +294,37 @@ namespace QueryDesignerCore.Expressions
                     return Expression.Not(Expression.Call(cna, prop));
 
                 case WhereFilterType.IsNull:
-                    return Expression.Equal(prop, ToConstantExpressionOfType(null, prop.Type));
+                    return Expression.Equal(prop, ToStaticParameterExpressionOfType(null, prop.Type));
 
                 case WhereFilterType.IsNotNull:
                     return Expression.Not(
-                        Expression.Equal(prop, ToConstantExpressionOfType(null, prop.Type)));
+                        Expression.Equal(prop, ToStaticParameterExpressionOfType(null, prop.Type)));
 
                 case WhereFilterType.IsEmpty:
                     if (prop.Type != typeof(string))
                         throw new InvalidCastException($"{filter.FilterType} can be applied to String type only");
-                    return Expression.Equal(prop, ToConstantExpressionOfType(string.Empty, prop.Type));
+                    return Expression.Equal(prop, ToStaticParameterExpressionOfType(string.Empty, prop.Type));
 
                 case WhereFilterType.IsNotEmpty:
                     if (prop.Type != typeof(string))
                         throw new InvalidCastException($"{filter.FilterType} can be applied to String type only");
                     return Expression.Not(
-                        Expression.Equal(prop, ToConstantExpressionOfType(string.Empty, prop.Type)));
+                        Expression.Equal(prop, ToStaticParameterExpressionOfType(string.Empty, prop.Type)));
 
                 case WhereFilterType.IsNullOrEmpty:
                     if (prop.Type != typeof(string))
                         throw new InvalidCastException($"{filter.FilterType} can be applied to String type only");
                     return Expression.OrElse(
-                        Expression.Equal(prop, ToConstantExpressionOfType(null, prop.Type)),
-                        Expression.Equal(prop, ToConstantExpressionOfType(string.Empty, prop.Type)));
+                        Expression.Equal(prop, ToStaticParameterExpressionOfType(null, prop.Type)),
+                        Expression.Equal(prop, ToStaticParameterExpressionOfType(string.Empty, prop.Type)));
 
                 case WhereFilterType.IsNotNullOrEmpty:
                     if (prop.Type != typeof(string))
                         throw new InvalidCastException($"{filter.FilterType} can be applied to String type only");
                     return Expression.Not(
                         Expression.OrElse(
-                            Expression.Equal(prop, ToConstantExpressionOfType(null, prop.Type)),
-                            Expression.Equal(prop, ToConstantExpressionOfType(string.Empty, prop.Type))));
+                            Expression.Equal(prop, ToStaticParameterExpressionOfType(null, prop.Type)),
+                            Expression.Equal(prop, ToStaticParameterExpressionOfType(string.Empty, prop.Type))));
 
                 default:
                     return prop;
@@ -375,19 +375,17 @@ namespace QueryDesignerCore.Expressions
         }
 
         /// <summary>
-        /// Converter to an nullable expression type.
+        /// Creates parameters expression of static value.
         /// </summary>
-        /// <returns>The constant expression of type.</returns>
+        /// <returns>The static parameter expression of type.</returns>
         /// <param name="obj">Filter value.</param>
-        /// <param name="type">Conversion to type.</param>
-        private static Expression ToConstantExpressionOfType(object obj, Type type)
-        {
-            if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
-                return Expression.Convert(Expression.Constant(obj), type);
-
-            return Expression.Constant(obj);
-        }
-
+        /// <param name="type">Type of value.</param>
+        private static Expression ToStaticParameterExpressionOfType(object obj, Type type)
+            => Expression.Convert(
+                Expression.Property(
+                    Expression.Constant(new { obj }), 
+                    "obj"),
+                type);
 
         /// <summary>
         /// Cast IEnumerable to IQueryable.
@@ -427,7 +425,7 @@ namespace QueryDesignerCore.Expressions
             {
                 throw new InvalidOperationException(string.Format("Property '{0}' not found on type '{1}'", name, t));
             }
-          
+
             if (t != p.DeclaringType)
             {
                 p = p.DeclaringType.GetRuntimeProperties().SingleOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
