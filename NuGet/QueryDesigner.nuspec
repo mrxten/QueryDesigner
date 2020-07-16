@@ -2,14 +2,14 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id> QueryDesigner </id>
-    <version>3.0.1</version>
+    <version>3.0.2</version>
     <authors>Vladislav Zhukov</authors>
     <owners>mrxten</owners>
     <licenseUrl>https://raw.githubusercontent.com/mrxten/QueryDesigner/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/mrxten/QueryDesigner</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>QueryDesigner provides way of creating complex IQueryable filtering based on dynamic expression trees.</description>
-    <releaseNotes>Added DateTimeOffset to available cast types.</releaseNotes>
+    <releaseNotes>Changed logics of expression creating on value. Using of parameter instead of constant.</releaseNotes>
     <copyright>Copyright 2020</copyright>
     <tags>linq query filtering entity-framework</tags>
   </metadata>
