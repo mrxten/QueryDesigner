@@ -83,6 +83,8 @@ namespace QueryDesignerCore.Expressions
         {
             typeof(DateTime),
             typeof(DateTime?),
+            typeof(DateTimeOffset),
+            typeof(DateTimeOffset?),
             typeof(TimeSpan),
             typeof(TimeSpan?),
             typeof(bool),
