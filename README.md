@@ -1,11 +1,11 @@
-# QueryDesigner
-[![NuGet](https://img.shields.io/nuget/v/querydesigner.svg?maxAge=259200&style=flat)](http://www.nuget.org/packages/QueryDesigner/)
+# Edvido.QueryDesigner -- forked from QueryDesigner
+[![NuGet](https://img.shields.io/nuget/v/edvido.querydesignercore.svg?maxAge=259200&style=flat)](https://www.nuget.org/packages/Edvido.QueryDesignerCore)
 
 With QueryDesigner you can create complex IQueryable filters. These filters are built in expression trees, so they can be used in both local collections and integrable queries in Entity Framework or Linq2SQL. The main target of the project is to building a filtering  of collection produced outside the .NET environment, for example with JavaScript in ASP.NET project, in a dynamic way. 
 
 ## Install
 ```
-PM> Install-Package QueryDesigner
+PM> Install-Package Edvido.QueryDesignerCore
 ```
 
 ## Basic usage
