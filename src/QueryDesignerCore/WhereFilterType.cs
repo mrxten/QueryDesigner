@@ -112,26 +112,27 @@
 
 
         /// <summary>
-        /// Collection count.
+        /// Collection count equal the value.
         /// </summary>
         CountEquals,
 
 
         /// <summary>
-        /// Collection count greater less the value..
+        /// Collection count less than the value.
         /// </summary>
         CountLessThan,
 
+         /// <summary>
+        /// Collection count is  less than or equal to value.
+        /// </summary>
+        CountLessThanOrEqual,
         
         /// <summary>
         /// Collection count greater than the value.
         /// </summary>
         CountGreaterThan,
 
-        /// <summary>
-        /// Collection count is  less than or equal to value.
-        /// </summary>
-        CountLessThanOrEqual,
+       
 
         /// <summary>
         /// Collection count is greater than or equal to the value.
