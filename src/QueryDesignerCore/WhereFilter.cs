@@ -27,5 +27,11 @@
         /// Value for filtering.
         /// </summary>
         public object Value { get; set; }
+
+        /// <summary>
+        /// Operands of collection boolean expressions.
+        /// </summary>
+        public TreeFilter OperandsOfCollections { get; set; }
+
     }
 }
