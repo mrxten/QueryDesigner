@@ -166,6 +166,41 @@ Okay, now select users only who have sport cars capable of speeds up to 300 km /
    }
 }
 ```
+If we want to complicate the situation a little more, we can select users only who have more than 4 sport cars capable of speeds up to 300 km / hour with model Mercedes.
+
+
+```csharp
+var filter = new FilterContainer
+    {
+	Where = new TreeFilter
+	{
+        Field = "Cars",
+        FilterType = WhereFilterType.CountGreaterThan,
+	    Value = 4,
+	    OperandsOfCollections = new TreeFilter
+	    {
+		    OperatorType = TreeFilterType.And,
+		    Operands = new List<TreeFilter>
+		    {
+		     new TreeFilter
+		    	{
+			    Field = "MaxSpeed",
+			    FilterType = WhereFilterType.GreaterThan,
+			    Value = 300
+		    	},
+			    new TreeFilter
+			    {
+			    Field = "Model",
+			    FilterType = WhereFilterType.Equals,
+			    Value = "Mercedes"
+		    	}
+		    }
+		
+	    }
+	},
+    };
+```
+
 Field supports the appeal to the properties of the members of the entity with unlimited nesting. Similarly works sorting.
 
 ## Filtering methods
@@ -185,6 +220,11 @@ Currently FilterType allows you to filter by the following ways:
 2. Applied to the listed items without using Value:
   * Any
   * NotAny
+  * CountEquals
+  * CountLessThan
+  * CountGreaterThan
+  * CountLessThanOrEqual
+  * CountGreaterThanOrEqual
   
 ## Entity members
 Available types for single member entities, **which can be filtered**:
