@@ -108,6 +108,38 @@
         /// <summary>
         /// The field is not null or empty
         /// </summary>
-        IsNotNullOrEmpty
+        IsNotNullOrEmpty,
+
+
+        /// <summary>
+        /// Collection count equal the value.
+        /// </summary>
+        CountEquals,
+
+
+        /// <summary>
+        /// Collection count less than the value.
+        /// </summary>
+        CountLessThan,
+
+         /// <summary>
+        /// Collection count is  less than or equal to value.
+        /// </summary>
+        CountLessThanOrEqual,
+        
+        /// <summary>
+        /// Collection count greater than the value.
+        /// </summary>
+        CountGreaterThan,
+
+       
+
+        /// <summary>
+        /// Collection count is greater than or equal to the value.
+        /// </summary>
+        CountGreaterThanOrEqual,
+
+
+
     }
 }

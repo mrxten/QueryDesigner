@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -14,6 +15,12 @@ namespace QueryDesignerCore.Expressions
         /// String type.
         /// </summary>
         private static readonly Type StringType = typeof(string);
+
+
+        /// <summary>
+        /// Integer type.
+        /// </summary>
+        private static readonly Type IntType = typeof(int);
 
         /// <summary>
         /// Expression type.
@@ -72,9 +79,43 @@ namespace QueryDesignerCore.Expressions
                 method.GetParameters().Length == 2);
 
         /// <summary>
+        /// Info about "Any" method with one parameter for collection.
+        /// </summary>
+        private static readonly MethodInfo CollectionCount = QueryableType.GetRuntimeMethods().Single(
+                method => method.Name == "Count" &&
+                method.GetParameters().Length == 1);
+
+        /// <summary>
+        /// Info about "Any" method with one parameter for collection.
+        /// </summary>
+        private static readonly MethodInfo CollectionCount2 = QueryableType.GetRuntimeMethods().Single(
+                method => method.Name == "Count" &&
+                method.GetParameters().Length == 2);
+
+        /// <summary>
         /// Info about method of constructing expressions.
         /// </summary>
         private static readonly MethodInfo ExpressionMethod = typeof(WhereExpression).GetRuntimeMethods().FirstOrDefault(m => m.Name == "GetExpression");
+
+        /// <summary>
+        /// Info about method of constructing expressions.
+        /// </summary>
+        private static readonly MethodInfo ExpressionTreeMethod = typeof(WhereExpression).GetRuntimeMethods().FirstOrDefault(m => m.Name == "GetTreeExpression");
+
+
+        /// <summary>
+        /// Info about avaliable methods for filter types.
+        /// </summary>
+        private static readonly Dictionary<WhereFilterType, List<MethodInfo>> FilterTypeAvaliableMethods = new Dictionary<WhereFilterType, List<MethodInfo>>()
+        {
+            {WhereFilterType.Any, new List<MethodInfo>(){CollectionAny,CollectionAny2 } },
+            {WhereFilterType.NotAny, new List<MethodInfo>(){CollectionAny,CollectionAny2 } },
+            {WhereFilterType.CountEquals, new List<MethodInfo>(){ CollectionCount, CollectionCount2 } },
+            {WhereFilterType.CountGreaterThan, new List<MethodInfo>(){ CollectionCount, CollectionCount2 } },
+            {WhereFilterType.CountGreaterThanOrEqual, new List<MethodInfo>(){ CollectionCount, CollectionCount2 } },
+            {WhereFilterType.CountLessThan, new List<MethodInfo>(){ CollectionCount, CollectionCount2 } },
+            {WhereFilterType.CountLessThanOrEqual, new List<MethodInfo>(){ CollectionCount, CollectionCount2 } },
+        };
 
         /// <summary>
         /// Available types for conversion.
@@ -126,6 +167,8 @@ namespace QueryDesignerCore.Expressions
         public static Expression<Func<T, bool>> GetExpression<T>(this WhereFilter filter, string suffix = "")
         {
             var e = Expression.Parameter(typeof(T), "e" + suffix);
+
+
             var exs = GetExpressionForField(e, filter, suffix + "0");
             return Expression.Lambda<Func<T, bool>>(exs, e);
         }
@@ -202,21 +245,25 @@ namespace QueryDesignerCore.Expressions
                         Field = t,
                         FilterType = filter.FilterType,
                         Value = filter.Value
-                    },
-                    suffix
+                    }, suffix
                     };
                     var expr = (Expression)generic.Invoke(null, pars);
-                    return Expression.Call(
+
+                    var call = Expression.Call(
                         CollectionAny2.MakeGenericMethod(
                         prop.Type.GenericTypeArguments.First()),
                         prop,
                         expr);
+
+                    return call;
+
                 }
                 prop = Expression.Property(prop, GetDeclaringProperty(prop, t));
             }
             var exp = GenerateExpressionOneField(prop, filter);
             return exp;
         }
+
 
         /// <summary>
         /// Construct bool-expression between different expression and a filter.
@@ -282,16 +329,13 @@ namespace QueryDesignerCore.Expressions
                 case WhereFilterType.Any:
                     if (IsEnumerable(prop))
                         prop = AsQueryable(prop);
-                    var ca = CollectionAny.MakeGenericMethod(
-                        prop.Type.GenericTypeArguments.First());
-                    return Expression.Call(ca, prop);
+
+                    return CreateMethodCall(prop, filter);
 
                 case WhereFilterType.NotAny:
                     if (IsEnumerable(prop))
                         prop = AsQueryable(prop);
-                    var cna = CollectionAny.MakeGenericMethod(
-                        prop.Type.GenericTypeArguments.First());
-                    return Expression.Not(Expression.Call(cna, prop));
+                    return Expression.Not(CreateMethodCall(prop, filter));
 
                 case WhereFilterType.IsNull:
                     return Expression.Equal(prop, ToStaticParameterExpressionOfType(null, prop.Type));
@@ -326,10 +370,85 @@ namespace QueryDesignerCore.Expressions
                             Expression.Equal(prop, ToStaticParameterExpressionOfType(null, prop.Type)),
                             Expression.Equal(prop, ToStaticParameterExpressionOfType(string.Empty, prop.Type))));
 
+
+                case WhereFilterType.CountEquals:
+                    if (IsEnumerable(prop))
+                        prop = AsQueryable(prop);
+
+                    return Expression.Equal(CreateMethodCall(prop, filter), Expression.Constant(filter.Value, IntType));
+
+                case WhereFilterType.CountGreaterThan:
+                    if (IsEnumerable(prop))
+                        prop = AsQueryable(prop);
+
+                    return Expression.GreaterThan(CreateMethodCall(prop, filter), Expression.Constant(filter.Value, IntType));
+
+                case WhereFilterType.CountGreaterThanOrEqual:
+                    if (IsEnumerable(prop))
+                        prop = AsQueryable(prop);
+                    return Expression.GreaterThanOrEqual(CreateMethodCall(prop, filter), Expression.Constant(filter.Value, IntType));
+
+                case WhereFilterType.CountLessThan:
+                    if (IsEnumerable(prop))
+                        prop = AsQueryable(prop);
+                    return Expression.LessThan(CreateMethodCall(prop, filter), Expression.Constant(filter.Value, IntType));
+
+                case WhereFilterType.CountLessThanOrEqual:
+                    if (IsEnumerable(prop))
+                        prop = AsQueryable(prop);
+                    return Expression.LessThanOrEqual(CreateMethodCall(prop, filter), Expression.Constant(filter.Value, IntType));
+
                 default:
                     return prop;
             }
         }
+        /// <summary>
+        /// Create method call with different expression
+        /// </summary>
+        /// <param name="prop">Different expression.</param>
+        /// <param name="filter">Filter for query.</param>
+        /// <returns>Method call expression.</returns>
+        private static MethodCallExpression CreateMethodCall(Expression prop, WhereFilter filter)
+        {
+            var methods = FilterTypeAvaliableMethods[filter.FilterType];
+
+
+            var mf = methods[0].MakeGenericMethod(
+                     prop.Type.GenericTypeArguments.First());
+
+            var mf2 = methods[1].MakeGenericMethod(
+                       prop.Type.GenericTypeArguments.First());
+
+
+            return filter.OperandsOfCollections == null ?
+                    Expression.Call(mf, prop) :
+                    Expression.Call(mf2, prop, CreateCollectionMethodExpression(filter.OperandsOfCollections, prop.Type.GenericTypeArguments.First()));
+
+        }
+
+
+        /// <summary>
+        /// Create expression for collection methods
+        /// </summary>
+        /// <param name="filter">Filter value.</param>
+        /// <param name="type">Conversion to type.</param>
+        /// <param name="suffix">Suffix vor variable.</param>
+        /// <returns>Converted value.</returns>
+        private static Expression CreateCollectionMethodExpression(TreeFilter filter, Type type, string suffix = "")
+        {
+
+            var generic = ExpressionTreeMethod.MakeGenericMethod(type);
+
+            object[] pars = {
+                     filter
+                     ,suffix+"0"
+                    };
+            var expr = (Expression)generic.Invoke(null, pars);
+
+            return expr;
+
+        }
+
 
         /// <summary>
         /// Value type filter field conversion.
@@ -383,7 +502,7 @@ namespace QueryDesignerCore.Expressions
         private static Expression ToStaticParameterExpressionOfType(object obj, Type type)
             => Expression.Convert(
                 Expression.Property(
-                    Expression.Constant(new { obj }), 
+                    Expression.Constant(new { obj }),
                     "obj"),
                 type);
 
