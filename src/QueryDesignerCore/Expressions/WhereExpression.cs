@@ -552,15 +552,4 @@ namespace QueryDesignerCore.Expressions
             return p;
         }
     }
-
-    public class Parent
-    {
-        public Child[] Children { get; set; }
-    }
-
-    public class Child
-    {
-        public int ID { get; set; }
-        public Guid SomeID { get; set; }
-    }
 }

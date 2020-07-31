@@ -140,7 +140,6 @@ Let's extend existing user entity and add another:
 ```csharp
 public class User 
 {
-    public bool Status { get; set; }
     public int Id { get; set; }
     public string Name { get; set; }
     public int Age { get; set; }
@@ -149,7 +148,6 @@ public class User
 
 public class Car
 {
-    public bool Status { get; set; }
     public int CarId { get; set; }
     public string Model { get; set; } 
     public int MaxSpeed { get; set; }
