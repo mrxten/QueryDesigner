@@ -86,11 +86,34 @@ namespace QueryDesignerCore.Expressions
                 method.GetParameters().Length == 1);
 
         /// <summary>
-        /// Info about "Any" method with one parameter for collection.
+        /// Info about "Any" method with two parameter for collection.
         /// </summary>
         private static readonly MethodInfo CollectionCount2 = QueryableType.GetRuntimeMethods().Single(
                 method => method.Name == "Count" &&
                 method.GetParameters().Length == 2);
+
+
+        /// <summary>
+        /// Info about "FirstOrDefault" method with one parameter for collection.
+        /// </summary>
+        private static readonly MethodInfo CollectionFirstOrDefault = QueryableType.GetRuntimeMethods().Single(
+                method => method.Name == "FirstOrDefault" &&
+                method.GetParameters().Length == 1);
+
+        /// <summary>
+        /// Info about "FirstOrDefault" method with two parameter for collection.
+        /// </summary>
+        private static readonly MethodInfo CollectionFirstOrDefault2 = QueryableType.GetRuntimeMethods().Single(
+                method => method.Name == "FirstOrDefault" &&
+                method.GetParameters().Length == 2);
+
+
+      
+
+        /// <summary>
+        /// Info about "Length" property.
+        /// </summary>
+        private static readonly PropertyInfo LengthProperty = StringType.GetProperty("Length");
 
         /// <summary>
         /// Info about method of constructing expressions.
@@ -115,6 +138,8 @@ namespace QueryDesignerCore.Expressions
             {WhereFilterType.CountGreaterThanOrEqual, new List<MethodInfo>(){ CollectionCount, CollectionCount2 } },
             {WhereFilterType.CountLessThan, new List<MethodInfo>(){ CollectionCount, CollectionCount2 } },
             {WhereFilterType.CountLessThanOrEqual, new List<MethodInfo>(){ CollectionCount, CollectionCount2 } },
+            {WhereFilterType.FirstOrDefaultIsNull, new List<MethodInfo>(){ CollectionFirstOrDefault, CollectionFirstOrDefault2 } },
+            {WhereFilterType.FirstOrDefaultNotNull, new List<MethodInfo>(){ CollectionFirstOrDefault, CollectionFirstOrDefault2 } },
         };
 
         /// <summary>
@@ -200,18 +225,64 @@ namespace QueryDesignerCore.Expressions
             if (filter.OperatorType == TreeFilterType.None)
                 return GetExpressionForField(e, filter, suffix + "0");
 
+
+            var mi = filter.OperatorType == TreeFilterType.And ? AndExpMethod : OrExpMethod;
             if (!(filter.Operands?.Any() ?? false))
-                throw new ArgumentException("Filter operands with operator type different from TreeFilterType.None cannot be empty.");
+            {
+                if (filter.OperandsOfCollections != null &&
+                   (filter.OperandsOfCollections.Operands?.Any() ?? false))
+                {
+                    if (String.IsNullOrWhiteSpace(filter.Field))
+                        return GetExpressionForTreeField(e, filter.OperandsOfCollections, suffix + 0);
+                    else
+                    {
+                        var fieldExp = GetExpressionForField(e, new WhereFilter
+                        {
+                            Field = filter.Field,
+                            FilterType = filter.FilterType,
+                            Value = filter.Value
+                        }, suffix + 0);
+                        var expCollection = GetExpressionForTreeField(e, filter.OperandsOfCollections, suffix + 0);
+                        return (BinaryExpression)mi.Invoke(null, new object[] { fieldExp, expCollection });
+                    }
+
+                }
+                else
+                {
+                    throw new ArgumentException("Filter operands with operator type different from TreeFilterType.None cannot be empty.");
+                }
+
+            }
 
             var i = 0;
-            var exp = GetExpressionForTreeField(e, filter.Operands[i], suffix + i);
-            var mi = filter.OperatorType == TreeFilterType.And ? AndExpMethod : OrExpMethod;
-            for (i = 1; i < filter.Operands.Count; i++)
+            var exp = String.IsNullOrWhiteSpace(filter.Field) ?
+                GetExpressionForTreeField(e, filter.Operands[i], suffix + i) :
+                GetExpressionForField(e, new WhereFilter
+                {
+                    Field = filter.Field,
+                    FilterType = filter.FilterType,
+                    Value = filter.Value
+                }, suffix + i);
+
+
+            // if field is  null or white space it starts from one because we already added zeroth element.
+            if (String.IsNullOrWhiteSpace(filter.Field))
+                i = 1;
+
+            for (int z = i; z < filter.Operands.Count; z++)
             {
-                var args = new object[] { exp, GetExpressionForTreeField(e, filter.Operands[i], suffix + i) };
+                var args = new object[] { exp, GetExpressionForTreeField(e, filter.Operands[z], suffix + z) };
                 exp = (BinaryExpression)mi.Invoke(null, args);
             }
+
+            if (filter.OperandsOfCollections != null &&
+               (filter.OperandsOfCollections.Operands?.Any() ?? false))
+            {
+                exp = (BinaryExpression)mi.Invoke(null, new object[] { GetExpressionForTreeField(e, filter.OperandsOfCollections, suffix + 0) });
+            }
+
             return exp;
+
         }
 
         /// <summary>
@@ -230,7 +301,7 @@ namespace QueryDesignerCore.Expressions
                 throw new ArgumentException("Filter type cannot be None for single filter.");
             var s = filter.Field.Split('.');
             Expression prop = e;
-            string prev = "";   
+            string prev = "";
             foreach (var t in s)
             {
                 if (IsEnumerable(prop))
@@ -407,6 +478,41 @@ namespace QueryDesignerCore.Expressions
                         prop = AsQueryable(prop);
                     return Expression.LessThanOrEqual(CreateMethodCall(prop, filter), Expression.Constant(filter.Value, IntType));
 
+                case WhereFilterType.LengthEquals:
+                 if (prop.Type != typeof(string))
+                        throw new InvalidCastException($"{filter.FilterType} can be applied to String type only");
+                    return Expression.Equal(Expression.Property(prop, LengthProperty), Expression.Constant(filter.Value, IntType));
+
+                case WhereFilterType.LengthGreaterThan:
+                 if (prop.Type != typeof(string))
+                        throw new InvalidCastException($"{filter.FilterType} can be applied to String type only");
+                    return Expression.GreaterThan(Expression.Property(prop, LengthProperty), Expression.Constant(filter.Value, IntType));
+
+                case WhereFilterType.LengthGreaterThanOrEqual:
+                 if (prop.Type != typeof(string))
+                        throw new InvalidCastException($"{filter.FilterType} can be applied to String type only");
+                    return Expression.GreaterThanOrEqual(Expression.Property(prop, LengthProperty), Expression.Constant(filter.Value, IntType));
+
+                case WhereFilterType.LengthLessThan:
+                 if (prop.Type != typeof(string))
+                        throw new InvalidCastException($"{filter.FilterType} can be applied to String type only");
+                    return Expression.LessThan(Expression.Property(prop, LengthProperty), Expression.Constant(filter.Value, IntType));
+
+                case WhereFilterType.LengthLessThanOrEqual:
+                 if (prop.Type != typeof(string))
+                        throw new InvalidCastException($"{filter.FilterType} can be applied to String type only");
+                    return Expression.LessThanOrEqual(Expression.Property(prop, LengthProperty), Expression.Constant(filter.Value, IntType));
+
+                case WhereFilterType.FirstOrDefaultIsNull:
+                    if (IsEnumerable(prop))
+                        prop = AsQueryable(prop);
+                    return Expression.Equal(CreateMethodCall(prop, filter), ToStaticParameterExpressionOfType(null, prop.Type));
+
+                case WhereFilterType.FirstOrDefaultNotNull:
+                    if (IsEnumerable(prop))
+                        prop = AsQueryable(prop);
+                    return Expression.Not(Expression.Equal(CreateMethodCall(prop, filter), ToStaticParameterExpressionOfType(null, prop.Type)));
+                    
                 default:
                     return prop;
             }

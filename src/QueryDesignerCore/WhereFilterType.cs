@@ -140,6 +140,46 @@
         CountGreaterThanOrEqual,
 
 
+        /// <summary>
+        /// The string field value length is equals to the value.
+        /// </summary>
+        LengthEquals,
+
+        /// <summary>
+        /// The string field value length is less than to the value.
+        /// </summary>
+        LengthLessThan,
+
+
+        /// <summary>
+        /// The string field value length is greater than to the value.
+        /// </summary>
+        LengthGreaterThan,
+
+
+        /// <summary>
+        /// The string field value length is less than or equal to the value.
+        /// </summary>
+        LengthLessThanOrEqual,
+
+
+        /// <summary>
+        /// The string field value length is greater than or equal to the value.
+        /// </summary>
+        LengthGreaterThanOrEqual,
+
+        /// <summary>
+        /// Collection first or default object is equal to the null.
+        /// </summary>
+        FirstOrDefaultIsNull,
+
+
+        /// <summary>
+        /// Collection first or default object is bot equal not to the null.
+        /// </summary>
+        FirstOrDefaultNotNull,
+
+
 
     }
 }
